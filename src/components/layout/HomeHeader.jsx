@@ -13,6 +13,7 @@ export default function HomeHeader() {
     const user = useStore(s => s.user);
   
     const profile = useStore(s => s.profile);
+    console.log(profile);
     
     const payload = {
         // Patient Info (From Auth Store)

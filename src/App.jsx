@@ -30,13 +30,25 @@ const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
 
 async function resolveRole(uid) {
+  const withTimeout = (promise, ms) =>
+    Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))]);
+
   try {
-    const snap = await getDocs(query(collection(db, "clinics"), where("ownerUid", "==", uid)));
+    const snap = await withTimeout(
+      getDocs(query(collection(db, "clinics"), where("ownerUid", "==", uid))),
+      3000
+    );
     if (!snap.empty) return "clinic_admin";
-    const uSnap = await getDoc(doc(db, "users", uid));
+
+    const uSnap = await withTimeout(
+      getDoc(doc(db, "users", uid)),
+      3000
+    );
     if (uSnap.exists()) return "user";
-  } catch (e) { console.error("resolveRole:", e); }
-  return null;
+  } catch (e) {
+    console.error("resolveRole:", e);
+  }
+  return "user"; // Default to user to prevent the app from freezing on the loading screen
 }
 
 function AuthProvider({ children }) {
@@ -50,29 +62,41 @@ function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (fbUser) => {
-      if (!fbUser) {
-        setUser(null);
-        setRole(null);
-        // 2. Sync with Store
-        setUserStore(null, null);
+      try {
+        if (!fbUser) {
+          setUser(null);
+          setRole(null);
+          setUserStore(null, null);
+          return;
+        }
+
+        const r = await resolveRole(fbUser.uid);
+
+        // Fetch Profile Data
+        let profileData = { role: r };
+        try {
+          const withTimeout = (promise, ms) =>
+            Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))]);
+
+          const uSnap = await withTimeout(
+            getDoc(doc(db, "users", fbUser.uid)),
+            3000
+          );
+          if (uSnap.exists()) {
+            profileData = uSnap.data();
+          }
+        } catch (e) {
+          console.error("Failed to fetch user document:", e);
+        }
+
+        setUser(fbUser);
+        setRole(r);
+        setUserStore(fbUser, profileData);
+      } catch (err) {
+        console.error("Unexpected error in auth observer:", err);
+      } finally {
         setLoading(false);
-        return;
       }
-
-      const r = await resolveRole(fbUser.uid);
-
-      // Fetch Profile Data (Optional but recommended)
-      // If you have a 'users' collection, fetch it here to pass to 'profile'
-      const uSnap = await getDoc(doc(db, "users", fbUser.uid));
-      const profileData = uSnap.exists() ? uSnap.data() : { role: r };
-
-      setUser(fbUser);
-      setRole(r);
-
-      // 3. Sync with Store - This fills 'user' and 'profile' in Zustand
-      setUserStore(fbUser, profileData);
-
-      setLoading(false);
     });
     return unsub;
   }, [setUserStore]); // Add dependency for safety
