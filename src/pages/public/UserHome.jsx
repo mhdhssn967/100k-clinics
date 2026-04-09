@@ -10,6 +10,7 @@ import ClinicList from "../../components/common/Homepage/ClinicList";
 import ClinicSearchCard from "../../components/common/Homepage/ClinicSearchCard";
 
 export default function UserHome() {
+
   const clinics          = useStore(s => s.clinics);
   const loadClinics      = useStore(s => s.loadClinics);
   const loadAppointments = useStore(s => s.loadAppointments);

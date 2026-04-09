@@ -6,17 +6,17 @@ import { auth, db } from "../firebaseConfig";
 import { useStore } from "./store/index.js";
 
 // Layout & Modals
-import BottomNav    from "./components/layout/BottomNav.jsx";
+import BottomNav from "./components/layout/BottomNav.jsx";
 import BookingModal from "./components/common/Homepage/BookingModal.jsx";
 
 // Pages
-import Home         from "./pages/public/Home.jsx";
-import Login        from "./pages/public/Login.jsx";
+import Home from "./pages/public/Home.jsx";
+import Login from "./pages/public/Login.jsx";
 import ClinicRegister from "./pages/auth/ClinicRegister.jsx";
-import UserHome     from "./pages/public/UserHome.jsx";
+import UserHome from "./pages/public/UserHome.jsx";
 import BookingsPage from "./pages/public/BookingsPage.jsx";
 import ClinicDetail from "./components/common/Homepage/ClinicDetail.jsx";
-import ReviewsPage  from "./pages/public/ReviewsPage.jsx";
+import ReviewsPage from "./pages/public/ReviewsPage.jsx";
 import SettingsPage from "./pages/public/SettingsPage.jsx";
 import ClinicAdminPanel from "./pages/public/ClinicAdminPanel.jsx";
 import ClinicBookingsPage from "./pages/clinic-admin/ClinicBookingsPage.jsx";
@@ -40,37 +40,38 @@ async function resolveRole(uid) {
 }
 
 function AuthProvider({ children }) {
-  const [user, setUser] = useState(undefined); 
+  const [user, setUser] = useState(undefined);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
+
   // 1. Change this to the correct name from your store's authSlice
-  const setUserStore = useStore(s => s.setUser); 
+  const setUserStore = useStore(s => s.setUser);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (fbUser) => {
       if (!fbUser) {
-        setUser(null); 
+        setUser(null);
         setRole(null);
         // 2. Sync with Store
-        setUserStore(null, null); 
+        setUserStore(null, null);
         setLoading(false);
         return;
       }
 
       const r = await resolveRole(fbUser.uid);
-      
+
       // Fetch Profile Data (Optional but recommended)
       // If you have a 'users' collection, fetch it here to pass to 'profile'
       const uSnap = await getDoc(doc(db, "users", fbUser.uid));
       const profileData = uSnap.exists() ? uSnap.data() : { role: r };
 
-      setUser(fbUser); 
+      setUser(fbUser);
       setRole(r);
-      
+
       // 3. Sync with Store - This fills 'user' and 'profile' in Zustand
-      setUserStore(fbUser, profileData); 
-      
+      setUserStore(fbUser, profileData);
+
       setLoading(false);
     });
     return unsub;
@@ -84,18 +85,45 @@ function AuthProvider({ children }) {
 // ─────────────────────────────────────────────
 function SmartRoot() {
   const { user, role, loading } = useAuth();
+
   if (loading) return <Spinner />;
-  if (!user)   return <Home />;
-  return <Navigate to={role === "clinic_admin" ? "/clinic/home" : "/user/home"} replace />;
+  if (!user) return <Home />;
+
+  // 🔥 ADD THIS
+  if (role === null) return <Spinner />;
+
+  return (
+    <Navigate
+      to={role === "clinic_admin" ? "/clinic/home" : "/user/home"}
+      replace
+    />
+  );
 }
 
 function ProtectedRoute({ children, requiredRole }) {
   const { user, role, loading } = useAuth();
   const location = useLocation();
+
   if (loading) return <Spinner />;
-  if (!user)   return <Navigate to="/login/user" state={{ from: location }} replace />;
-  if (requiredRole && role !== requiredRole)
-    return <Navigate to={role === "clinic_admin" ? "/clinic/home" : "/user/home"} replace />;
+
+  if (!user) {
+    return <Navigate to="/login/user" state={{ from: location }} replace />;
+  }
+
+  // 🔥 ADD THIS CONDITION
+  if (role === null) {
+    return <Spinner />; // wait until role is resolved
+  }
+
+  if (requiredRole && role !== requiredRole) {
+    return (
+      <Navigate
+        to={role === "clinic_admin" ? "/clinic/home" : "/user/home"}
+        replace
+      />
+    );
+  }
+
   return children;
 }
 
@@ -110,12 +138,12 @@ function PublicOnlyRoute({ children }) {
 // Layout constants
 // ─────────────────────────────────────────────
 const FULL_WIDTH_PATHS = ["/", "/register-clinic"];
-const SHOW_NAV_PATHS   = ["/user/home", "/bookings", "/reviews", "/settings"];
+const SHOW_NAV_PATHS = ["/user/home", "/bookings", "/reviews", "/settings"];
 
 function AppShell() {
   const loc = useLocation();
   const isFullWidth = FULL_WIDTH_PATHS.includes(loc.pathname) || loc.pathname.startsWith("/login");
-  const showNav     = SHOW_NAV_PATHS.includes(loc.pathname);
+  const showNav = SHOW_NAV_PATHS.includes(loc.pathname);
 
   return (
     <>
@@ -129,7 +157,7 @@ function AppShell() {
 
           {/* Auth */}
           <Route path="/login/:role" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
-          <Route path="/login"       element={<Navigate to="/login/user" replace />} />
+          <Route path="/login" element={<Navigate to="/login/user" replace />} />
 
           {/* Clinic register — always open */}
           <Route path="/register-clinic" element={<ClinicRegister />} />
@@ -141,16 +169,16 @@ function AppShell() {
           <Route path="/clinic/home" element={
             <ProtectedRoute requiredRole="clinic_admin">
               {/* swap div for <ClinicHome /> when ready */}
-             <ClinicAdminPanel/>
+              <ClinicAdminPanel />
             </ProtectedRoute>
           } />
-          <Route path="/clinic/appointments" element={<ClinicBookingsPage/>}/>
+          <Route path="/clinic/appointments" element={<ClinicBookingsPage />} />
 
           {/* Patient app */}
           <Route path="/user/home" element={<ProtectedRoute requiredRole="user"><UserHome /></ProtectedRoute>} />
-          <Route path="/bookings"  element={<ProtectedRoute requiredRole="user"><BookingsPage /></ProtectedRoute>} />
-          <Route path="/reviews"   element={<ProtectedRoute requiredRole="user"><ReviewsPage /></ProtectedRoute>} />
-          <Route path="/settings"  element={<ProtectedRoute requiredRole="user"><SettingsPage /></ProtectedRoute>} />
+          <Route path="/bookings" element={<ProtectedRoute requiredRole="user"><BookingsPage /></ProtectedRoute>} />
+          <Route path="/reviews" element={<ProtectedRoute requiredRole="user"><ReviewsPage /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute requiredRole="user"><SettingsPage /></ProtectedRoute>} />
 
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
@@ -180,9 +208,8 @@ function Toast() {
   if (!toast) return null;
   return (
     <div
-      className={`fixed top-6 left-1/2 z-[100] px-5 py-3 rounded-2xl text-white text-sm font-semibold shadow-xl ${
-        toast.type === "error" ? "bg-rose-500" : "bg-slate-900"
-      }`}
+      className={`fixed top-6 left-1/2 z-[100] px-5 py-3 rounded-2xl text-white text-sm font-semibold shadow-xl ${toast.type === "error" ? "bg-rose-500" : "bg-slate-900"
+        }`}
       style={{ transform: "translateX(-50%)", animation: "toastIn 0.28s cubic-bezier(0.34,1.56,0.64,1)" }}
     >
       {toast.msg}

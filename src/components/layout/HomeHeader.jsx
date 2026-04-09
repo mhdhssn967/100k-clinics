@@ -11,6 +11,7 @@ export default function HomeHeader() {
   const [focused, setFocused] = useState(false);
 
     const user = useStore(s => s.user);
+  
     const profile = useStore(s => s.profile);
     
     const payload = {
