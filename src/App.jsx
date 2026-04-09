@@ -30,20 +30,12 @@ const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
 
 async function resolveRole(uid) {
-  const withTimeout = (promise, ms) =>
-    Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))]);
 
   try {
-    const snap = await withTimeout(
-      getDocs(query(collection(db, "clinics"), where("ownerUid", "==", uid))),
-      3000
-    );
+    const snap = await getDocs(query(collection(db, "clinics"), where("ownerUid", "==", uid)));
     if (!snap.empty) return "clinic_admin";
 
-    const uSnap = await withTimeout(
-      getDoc(doc(db, "users", uid)),
-      3000
-    );
+    const uSnap = await getDoc(doc(db, "users", uid));
     if (uSnap.exists()) return "user";
   } catch (e) {
     console.error("resolveRole:", e);
@@ -75,13 +67,7 @@ function AuthProvider({ children }) {
         // Fetch Profile Data
         let profileData = { role: r };
         try {
-          const withTimeout = (promise, ms) =>
-            Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))]);
-
-          const uSnap = await withTimeout(
-            getDoc(doc(db, "users", fbUser.uid)),
-            3000
-          );
+          const uSnap = await getDoc(doc(db, "users", fbUser.uid));
           if (uSnap.exists()) {
             profileData = uSnap.data();
           }
