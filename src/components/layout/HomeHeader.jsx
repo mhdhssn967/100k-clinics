@@ -104,7 +104,7 @@ export default function HomeHeader() {
         </div>
       </div>
  
-      <div className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 border transition-all duration-150 ${
+      {/* <div className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 border transition-all duration-150 ${
         focused ? "bg-white border-emerald-400 shadow-sm" : "bg-slate-50 border-slate-200"
       }`}>
         <Search size={15} className={focused ? "text-emerald-500" : "text-slate-400"} strokeWidth={2.5} />
@@ -117,7 +117,7 @@ export default function HomeHeader() {
           placeholder="Clinics, doctors, specialties…"
           className="flex-1 bg-transparent text-sm text-slate-700 placeholder-slate-400 focus:outline-none"
         />
-      </div>
+      </div> */}
     </div>
   );
 }
