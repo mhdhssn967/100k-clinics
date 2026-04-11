@@ -30,17 +30,19 @@ const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
 
 async function resolveRole(uid) {
-
   try {
-    const snap = await getDocs(query(collection(db, "clinics"), where("ownerUid", "==", uid)));
-    if (!snap.empty) return "clinic_admin";
+    const cSnap = await getDoc(doc(db, "clinics", uid));
+    if (cSnap.exists()) return "clinic_admin";
+
+    const qSnap = await getDocs(query(collection(db, "clinics"), where("ownerUid", "==", uid)));
+    if (!qSnap.empty) return "clinic_admin";
 
     const uSnap = await getDoc(doc(db, "users", uid));
     if (uSnap.exists()) return "user";
   } catch (e) {
     console.error("resolveRole:", e);
   }
-  return "user"; // Default to user to prevent the app from freezing on the loading screen
+  return null; // Avoid aggressive redirection
 }
 
 function AuthProvider({ children }) {
@@ -120,9 +122,13 @@ function ProtectedRoute({ children, requiredRole }) {
     return <Navigate to="/login/user" state={{ from: location }} replace />;
   }
 
-  // 🔥 ADD THIS CONDITION
+  // 🔥 ADD THIS CONDITION: Wait until role is definitively resolved
   if (role === null) {
-    return <Spinner />; // wait until role is resolved
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white text-slate-400">
+         Checking clearance...
+      </div>
+    );
   }
 
   if (requiredRole && role !== requiredRole) {
@@ -139,7 +145,7 @@ function ProtectedRoute({ children, requiredRole }) {
 
 function PublicOnlyRoute({ children }) {
   const { user, role, loading } = useAuth();
-  if (loading) return <Spinner />;
+  if (loading || (user && role === null)) return <Spinner />;
   if (user) return <Navigate to={role === "clinic_admin" ? "/clinic/home" : "/user/home"} replace />;
   return children;
 }

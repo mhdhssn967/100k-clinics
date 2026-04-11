@@ -8,7 +8,7 @@ import { auth } from "../../../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 
 
-function InlineEdit({ label, value, onSave, placeholder, hint }) {
+function InlineEdit({ label, value, onSave, placeholder, hint, isTextArea }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
 
@@ -24,21 +24,35 @@ function InlineEdit({ label, value, onSave, placeholder, hint }) {
         <p className="text-slate-900 font-semibold text-sm">{label}</p>
         {hint && <p className="text-slate-400 text-xs mt-0.5">{hint}</p>}
         {editing ? (
-          <div className="flex items-center gap-2 mt-2">
-            <input
-              autoFocus
-              value={draft}
-              onChange={e => setDraft(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter") save(); if (e.key === "Escape") cancel(); }}
-              placeholder={placeholder}
-              className="flex-1 border border-emerald-400 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-100"
-            />
-            <button onClick={save} className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center">
-              <Check size={13} className="text-white" strokeWidth={3} />
-            </button>
-            <button onClick={cancel} className="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center">
-              <X size={13} className="text-slate-500" />
-            </button>
+          <div className={`flex items-start gap-2 mt-2 ${isTextArea ? 'flex-col items-end' : ''}`}>
+            {isTextArea ? (
+              <textarea
+                autoFocus
+                value={draft}
+                onChange={e => setDraft(e.target.value)}
+                onKeyDown={e => { if (e.key === "Escape") cancel(); }}
+                placeholder={placeholder}
+                rows={4}
+                className="w-full border border-emerald-400 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-100 resize-none"
+              />
+            ) : (
+              <input
+                autoFocus
+                value={draft}
+                onChange={e => setDraft(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") save(); if (e.key === "Escape") cancel(); }}
+                placeholder={placeholder}
+                className="flex-1 border border-emerald-400 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+              />
+            )}
+            <div className="flex items-center gap-2">
+              <button onClick={save} className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center">
+                <Check size={13} className="text-white" strokeWidth={3} />
+              </button>
+              <button onClick={cancel} className="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center">
+                <X size={13} className="text-slate-500" />
+              </button>
+            </div>
           </div>
         ) : (
           <p className="text-slate-500 text-sm mt-1">{value || <span className="italic text-slate-300">{placeholder}</span>}</p>
@@ -172,6 +186,32 @@ export default function SettingsSection() {
             value={clinic.address}
             placeholder="Full clinic address"
             onSave={val => updateMeta({ address: val })}
+          />
+        </div>
+        <div className="px-4 py-4">
+          <InlineEdit
+            label="Website"
+            value={clinic.website}
+            placeholder="e.g. www.myclinic.com"
+            hint="Optional link to your primary website"
+            onSave={val => updateMeta({ website: val })}
+          />
+        </div>
+        <div className="px-4 py-4">
+          <InlineEdit
+            label="Email Address"
+            value={clinic.email}
+            placeholder="contact@myclinic.com"
+            onSave={val => updateMeta({ email: val })}
+          />
+        </div>
+        <div className="px-4 py-4">
+          <InlineEdit
+            label="Clinic Description"
+            value={clinic.description}
+            placeholder="Give users an overview of your hospital's rich history, expertise, and facilities."
+            isTextArea={true}
+            onSave={val => updateMeta({ description: val })}
           />
         </div>
       </div>

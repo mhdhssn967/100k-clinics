@@ -8,6 +8,14 @@ function generateDoctorId(name) {
   return "dr-" + name.toLowerCase().replace(/\s+/g, "-") + "-" + Date.now().toString(36);
 }
 
+function computeSpecialities(doctorsArray) {
+  const specs = new Set();
+  doctorsArray.forEach(d => {
+    if (d.specialty) specs.add(d.specialty);
+  });
+  return Array.from(specs);
+}
+
 // ── Status ───────────────────────────────────────────────────────────────────
 export async function updateClinicStatus(clinicId, isOpen) {
   const clinicRef = doc(db, "clinics", clinicId);
@@ -54,7 +62,7 @@ export async function updateClinicTimeSlots(clinicId, timeSlots) {
 }
 
 // ── Doctors ──────────────────────────────────────────────────────────────────
-export async function addDoctor(clinicId, doctorData, avatarFile) {
+export async function addDoctor(clinicId, doctorData, avatarFile, existingDoctors = []) {
   const doctorId = generateDoctorId(doctorData.name);
   let avatar = "";
 
@@ -73,9 +81,13 @@ export async function addDoctor(clinicId, doctorData, avatarFile) {
     createdAt: new Date().toISOString() // arrayUnion doesn't like serverTimestamp() inside objects
   };
 
+  const newDoctorsArray = [...existingDoctors, doctor];
+  const specialities = computeSpecialities(newDoctorsArray);
+
   const clinicRef = doc(db, "clinics", clinicId);
   await updateDoc(clinicRef, { 
-    doctors: arrayUnion(doctor) 
+    doctors: arrayUnion(doctor),
+    specialities
   });
 
   return doctor;
@@ -92,9 +104,13 @@ export async function updateDoctor(clinicId, updatedDoctor, doctors, avatarFile)
 
   const finalDoctor = { ...updatedDoctor, avatar };
   const newDoctors = doctors.map(d => d.id === updatedDoctor.id ? finalDoctor : d);
+  const specialities = computeSpecialities(newDoctors);
 
   const clinicRef = doc(db, "clinics", clinicId);
-  await updateDoc(clinicRef, { doctors: newDoctors });
+  await updateDoc(clinicRef, { 
+    doctors: newDoctors,
+    specialities
+  });
 
   return finalDoctor;
 }
@@ -103,9 +119,13 @@ export async function removeDoctor(clinicId, doctorId, doctors) {
   const doctor = doctors.find(d => d.id === doctorId);
   if (!doctor) return;
 
+  const newDoctors = doctors.filter(d => d.id !== doctorId);
+  const specialities = computeSpecialities(newDoctors);
+
   const clinicRef = doc(db, "clinics", clinicId);
   await updateDoc(clinicRef, { 
-    doctors: arrayRemove(doctor) 
+    doctors: arrayRemove(doctor),
+    specialities
   });
 
   // Cleanup storage if avatar exists and isn't a default UI avatar

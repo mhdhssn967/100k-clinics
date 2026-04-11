@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, User, ArrowLeft, CheckCircle2, ClipboardList, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Calendar, Clock, User, ArrowLeft, CheckCircle2, ClipboardList, ChevronRight, Search, Filter, Users, Activity, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminStore } from '../../store/adminStore';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../App';
 import Swal from 'sweetalert2';
+import AppointmentDetailsModal from '../../components/common/AppointmentDetailsModal';
 
 
 const STATUS_STYLES = {
@@ -38,14 +39,71 @@ export default function ClinicBookings() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [view, setView] = useState('active');
+  const [selectedAppt, setSelectedAppt] = useState(null);
   const { appointments, historyAppointments, loadClinicBookings, appointmentsLoading } = useAdminStore();
+
+  // ── Filter State ──
+  const [filterDoctor, setFilterDoctor] = useState('all');
+  const [filterSpecialty, setFilterSpecialty] = useState('all');
+  const [filterGender, setFilterGender] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     loadClinicBookings(user.uid);
   }, [user.uid]);
 
-  
-  const currentData = view === 'active' ? appointments : historyAppointments;
+  // ── Analytics & filter data collection ──
+  const allData = useMemo(() => [...appointments, ...historyAppointments], [appointments, historyAppointments]);
+
+  const { uniqueDoctors, uniqueSpecialties, analytics } = useMemo(() => {
+    const docs = new Set();
+    const specs = new Set();
+    const docCounts = {};
+    const specCounts = {};
+    let todayCount = 0;
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    allData.forEach(a => {
+      if (a.doctorName) {
+        docs.add(a.doctorName);
+        docCounts[a.doctorName] = (docCounts[a.doctorName] || 0) + 1;
+      }
+      if (a.doctorSpecialty) {
+        specs.add(a.doctorSpecialty);
+        specCounts[a.doctorSpecialty] = (specCounts[a.doctorSpecialty] || 0) + 1;
+      }
+      // Assuming appt.date format match
+      if (a.date === todayStr) todayCount++;
+    });
+
+    const topDoc = Object.entries(docCounts).sort((a,b) => b[1] - a[1])[0]?.[0] || 'N/A';
+    const topSpec = Object.entries(specCounts).sort((a,b) => b[1] - a[1])[0]?.[0] || 'N/A';
+
+    return {
+      uniqueDoctors: Array.from(docs).sort(),
+      uniqueSpecialties: Array.from(specs).sort(),
+      analytics: {
+        today: todayCount,
+        topDoc,
+        topSpec,
+        completionRate: allData.length ? Math.round((historyAppointments.filter(a => a.status === 'completed').length / allData.length) * 100) : 0
+      }
+    };
+  }, [allData, historyAppointments]);
+
+  const currentData = useMemo(() => {
+    const base = view === 'active' ? appointments : historyAppointments;
+    return base.filter(a => {
+      const matchDoc = filterDoctor === 'all' || a.doctorName === filterDoctor;
+      const matchSpec = filterSpecialty === 'all' || a.doctorSpecialty === filterSpecialty;
+      const matchGender = filterGender === 'all' || a.patientGender?.toLowerCase() === filterGender.toLowerCase();
+      const matchSearch = !searchQuery || 
+        a.patientName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        a.id.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      return matchDoc && matchSpec && matchGender && matchSearch;
+    });
+  }, [view, appointments, historyAppointments, filterDoctor, filterSpecialty, filterGender, searchQuery]);
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Top Bar */}
@@ -71,38 +129,72 @@ export default function ClinicBookings() {
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {[
-            { label: 'Active', value: appointments.length, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-            {
-              label: 'Completed',
-              value: historyAppointments.filter((a) => a.status === 'completed').length,
-              color: 'text-slate-700',
-              bg: 'bg-slate-100',
-            },
-            {
-              label: 'Cancelled',
-              value: historyAppointments.filter((a) => a.status === 'cancelled').length,
-              color: 'text-rose-600',
-              bg: 'bg-rose-50',
-            },
-            {
-              label: 'Total History',
-              value: historyAppointments.length,
-              color: 'text-violet-600',
-              bg: 'bg-violet-50',
-            },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-white rounded-2xl border border-slate-200 p-4">
-              <p className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">{stat.label}</p>
-              <div className="flex items-end justify-between">
-                <span className={`text-2xl font-bold ${stat.color}`}>{stat.value}</span>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${stat.bg} ${stat.color}`}>
-                  bookings
-                </span>
-              </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <StatCard label="Today's Load" value={analytics.today} color="text-amber-600" bg="bg-amber-50" icon={<Activity size={14}/>} />
+          <StatCard label="Top Doctor" value={analytics.topDoc} color="text-indigo-600" bg="bg-indigo-50" icon={<TrendingUp size={14}/>} subtext="Most bookings" />
+          <StatCard label="Top Specialty" value={analytics.topSpec} color="text-emerald-600" bg="bg-emerald-50" icon={<Activity size={14}/>} subtext="High demand" />
+          <StatCard label="Completion" value={`${analytics.completionRate}%`} color="text-violet-600" bg="bg-violet-50" icon={<CheckCircle2 size={14}/>} />
+        </div>
+
+        {/* Existing counts row - slightly refined */}
+        <div className="grid grid-cols-4 gap-3 mb-8">
+          <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 flex justify-between items-center">
+            <span className="text-[10px] uppercase font-bold text-slate-400">Active</span>
+            <span className="text-sm font-bold text-slate-700">{appointments.length}</span>
+          </div>
+          <div className="bg-slate-50 border border-slate-100 rounded-xl px-4 py-2.5 flex justify-between items-center">
+            <span className="text-[10px] uppercase font-bold text-slate-400">Total</span>
+            <span className="text-sm font-bold text-slate-700">{allData.length}</span>
+          </div>
+        </div>
+
+        {/* Filter Bar */}
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 mb-6 shadow-sm">
+          <div className="flex flex-col md:flex-row gap-4 items-center">
+            {/* Search */}
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input 
+                type="text"
+                placeholder="Search patient or ID..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all font-medium"
+              />
             </div>
-          ))}
+
+            {/* Selects */}
+            <div className="grid grid-cols-3 gap-2 w-full md:w-auto">
+              <select 
+                value={filterDoctor} 
+                onChange={e => setFilterDoctor(e.target.value)}
+                className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              >
+                <option value="all">Every Doctor</option>
+                {uniqueDoctors.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+              
+              <select 
+                value={filterSpecialty} 
+                onChange={e => setFilterSpecialty(e.target.value)}
+                className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              >
+                <option value="all">All Specs</option>
+                {uniqueSpecialties.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+
+              <select 
+                value={filterGender} 
+                onChange={e => setFilterGender(e.target.value)}
+                className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              >
+                <option value="all">All Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Toggle Tabs */}
@@ -138,16 +230,39 @@ export default function ClinicBookings() {
             <p className="text-sm text-slate-400">Loading appointments…</p>
           </div>
         ) : view === 'active' ? (
-          <ActiveCards appointments={currentData} />
+          <ActiveCards appointments={currentData} onSelect={setSelectedAppt} />
         ) : (
-          <HistoryTable appointments={currentData} />
+          <HistoryTable appointments={currentData} onSelect={setSelectedAppt} />
         )}
+      </div>
+
+      <AppointmentDetailsModal 
+        isOpen={!!selectedAppt} 
+        onClose={() => setSelectedAppt(null)} 
+        appt={selectedAppt} 
+      />
+    </div>
+  );
+}
+
+function StatCard({ label, value, color, bg, icon, subtext }) {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 p-4 hover:shadow-sm transition-all">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</p>
+        <div className={`${bg} ${color} p-1.5 rounded-lg`}>
+          {icon}
+        </div>
+      </div>
+      <div className="flex flex-col">
+        <span className={`text-xl font-bold ${color} truncate`}>{value}</span>
+        {subtext && <span className="text-[10px] text-slate-400 mt-0.5">{subtext}</span>}
       </div>
     </div>
   );
 }
 
-function ActiveCards({ appointments }) {
+function ActiveCards({ appointments, onSelect }) {
   if (appointments.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
@@ -163,13 +278,13 @@ function ActiveCards({ appointments }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {appointments.map((appt) => (
-        <AppointmentCard key={appt.id} appt={appt} />
+        <AppointmentCard key={appt.id} appt={appt} onSelect={onSelect} />
       ))}
     </div>
   );
 }
 
-function AppointmentCard({ appt }) {
+function AppointmentCard({ appt, onSelect }) {
 
   const completeBooking = useAdminStore(s => s.completeBooking);
 
@@ -223,7 +338,8 @@ function AppointmentCard({ appt }) {
 </div>
           <div>
             <p className="font-semibold text-slate-900 text-sm leading-tight">{appt.patientName}</p>
-            <p className="text-slate-400 text-xs mt-0.5 flex items-center gap-1">
+            <p className="text-slate-400 text-[10px] mt-0.5 font-medium">{appt.patientAge || 'Age N/A'} • {appt.patientGender || 'Gen N/A'}</p>
+            <p className="text-slate-400 text-[11px] mt-1 flex items-center gap-1">
               <User size={10} />  {appt.doctorName}
             </p>
           </div>
@@ -246,12 +362,15 @@ function AppointmentCard({ appt }) {
         </div>
       </div>
 
-      {/* Notes */}
-      {appt.notes && (
-        <div className="mx-5 mb-4 bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-[11px] text-slate-500 italic leading-relaxed">
-          "{appt.notes}"
-        </div>
-      )}
+      {/* Details Banner */}
+      <div className="px-5 mb-4">
+        <button 
+          onClick={() => onSelect(appt)}
+          className="w-full bg-slate-50 hover:bg-slate-100 border border-slate-100 rounded-xl px-3 py-2 text-[11px] text-slate-600 font-medium transition-colors flex justify-center items-center"
+        >
+          View Full Details
+        </button>
+      </div>
 
       {/* Action */}
       <div className="px-5 pb-5">
@@ -264,7 +383,7 @@ function AppointmentCard({ appt }) {
   );
 }
 
-function HistoryTable({ appointments }) {
+function HistoryTable({ appointments, onSelect }) {
   if (appointments.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center bg-white rounded-3xl border border-slate-100">
@@ -312,7 +431,8 @@ function HistoryTable({ appointments }) {
                 return (
                   <div
                     key={appt.id}
-                    className="grid grid-cols-12 items-center px-6 py-4 hover:bg-slate-50/50 transition-colors"
+                    onClick={() => onSelect(appt)}
+                    className="grid grid-cols-12 items-center px-6 py-4 hover:bg-slate-50/50 transition-colors cursor-pointer"
                   >
                     {/* Patient Info */}
                     <div className="col-span-5 flex items-center gap-3">

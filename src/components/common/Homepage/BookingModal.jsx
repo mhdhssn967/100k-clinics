@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { X, Check, Calendar, Clock, User, ChevronDown } from "lucide-react";
 import { useStore } from "../../../store";
+import Swal from "sweetalert2";
 
 
 function Step({ number, label, done }) {
@@ -70,7 +71,10 @@ export default function BookingModal() {
   const [selectedDoctor, setSelectedDoctor] = useState(bookingModal?.doctor || null);
   const [selectedSlot,   setSelectedSlot]   = useState(bookingModal?.slot || null);
   const [selectedDate,   setSelectedDate]   = useState("");
-  const [notes,          setNotes]          = useState("");
+  const [patientName,    setPatientName]    = useState(profile?.name || user?.displayName || "");
+  const [patientAge,     setPatientAge]     = useState("");
+  const [patientGender,  setPatientGender]  = useState("");
+  const [issue,          setIssue]          = useState("");
   const [loading,        setLoading]        = useState(false);
   
   if (!bookingModal) return null;
@@ -79,8 +83,17 @@ export default function BookingModal() {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const minDate = tomorrow.toISOString().split("T")[0];
-    console.log("saddsf",selectedDoctor, selectedSlot, selectedDate, user);
- const canBook = !!(selectedDoctor && selectedSlot && selectedDate && user);
+  console.log("saddsf",selectedDoctor, selectedSlot, selectedDate, user);
+  const canBook = !!(
+    selectedDoctor && 
+    selectedSlot && 
+    selectedDate && 
+    user && 
+    patientName.trim() && 
+    patientAge && 
+    patientGender && 
+    issue.trim()
+  );
 
   console.log(canBook)
 
@@ -90,15 +103,37 @@ export default function BookingModal() {
         return;
     }
 
+    const { isConfirmed } = await Swal.fire({
+      title: 'Confirm Booking?',
+      html: `
+        <div style="text-align: left; font-size: 14px; color: #475569; margin-top: 10px; line-height: 1.6;">
+          <p><strong>Clinic:</strong> ${clinic.name}</p>
+          <p><strong>Doctor:</strong> ${selectedDoctor.name}</p>
+          <p><strong>Time:</strong> ${selectedDate} at ${selectedSlot}</p>
+          <p><strong>Patient:</strong> ${patientName.trim()} (${patientAge}y, ${patientGender})</p>
+        </div>
+      `,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#10b981',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Yes, Book Appointment',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (!isConfirmed) return;
+
     setLoading(true);
     
     // Construct the payload with both Patient and Clinic info
     const payload = {
-      // Patient Info (From Auth Store)
+      // Patient Info
       patientUid: user.uid,
-      patientName: profile?.name || user.displayName || "Guest Patient",
+      patientName: patientName.trim(),
+      patientAge: patientAge,
+      patientGender: patientGender,
       patientPhone: profile?.phone || "",
-      patientProfileImage:profile?.photoURL,
+      patientProfileImage: profile?.photoURL || null,
 
       // Clinic Info
       clinicId: clinic.id, 
@@ -112,7 +147,7 @@ export default function BookingModal() {
       doctorSpecialty: selectedDoctor.specialty,
       date: selectedDate, 
       time: selectedSlot, 
-      notes,
+      notes: issue.trim(),
     };
 
     const result = await bookAppointment(payload);
@@ -192,22 +227,60 @@ export default function BookingModal() {
           <div>
             <p className="text-slate-600 text-xs font-semibold uppercase tracking-widest mb-2.5">Select Time</p>
             <div className="flex flex-wrap gap-2">
-              {clinic.timeSlots?.map(slot => (
-                <TimeSlot key={slot} slot={slot} selected={selectedSlot === slot} onSelect={setSelectedSlot} />
-              ))}
+              {!selectedDoctor ? (
+                <p className="text-sm text-slate-400 mt-1">Please select a doctor first.</p>
+              ) : selectedDoctor.timeSlots?.length > 0 ? (
+                selectedDoctor.timeSlots.map(slot => (
+                  <TimeSlot key={slot} slot={slot} selected={selectedSlot === slot} onSelect={setSelectedSlot} />
+                ))
+              ) : (
+                <p className="text-sm text-slate-400 mt-1">No time slots available for this doctor.</p>
+              )}
             </div>
           </div>
 
-          {/* Notes */}
+          {/* Patient Details & Reason */}
           <div>
-            <p className="text-slate-600 text-xs font-semibold uppercase tracking-widest mb-2.5">Notes <span className="normal-case font-normal text-slate-400">(optional)</span></p>
-            <textarea
-              value={notes}
-              onChange={e => setNotes(e.target.value)}
-              rows={2}
-              placeholder="Describe your symptoms or reason for visit…"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 resize-none transition-all"
-            />
+            <p className="text-slate-600 text-xs font-semibold uppercase tracking-widest mb-2.5 flex items-center justify-between">
+              Patient Details <span className="normal-case text-slate-400 text-[10px] font-normal">* All fields required</span>
+            </p>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={patientName}
+                onChange={e => setPatientName(e.target.value)}
+                placeholder="Patient Full Name"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all bg-slate-50 focus:bg-white"
+              />
+              <div className="flex gap-3">
+                <input
+                  type="number"
+                  value={patientAge}
+                  onChange={e => setPatientAge(e.target.value)}
+                  placeholder="Age"
+                  min="0"
+                  max="120"
+                  className="w-1/3 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all bg-slate-50 focus:bg-white"
+                />
+                <select
+                  value={patientGender}
+                  onChange={e => setPatientGender(e.target.value)}
+                  className={`w-2/3 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all bg-slate-50 focus:bg-white ${!patientGender ? "text-slate-400" : "text-slate-700"}`}
+                >
+                  <option value="" disabled>Select Gender</option>
+                  <option value="Male" className="text-slate-700">Male</option>
+                  <option value="Female" className="text-slate-700">Female</option>
+                  <option value="Other" className="text-slate-700">Other</option>
+                </select>
+              </div>
+              <textarea
+                value={issue}
+                onChange={e => setIssue(e.target.value)}
+                rows={2}
+                placeholder="Reason for visit / Main symptoms..."
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 resize-none transition-all bg-slate-50 focus:bg-white"
+              />
+            </div>
           </div>
 
           {/* Summary chip (shows when all selected) */}

@@ -3,12 +3,12 @@
 // Reads/writes ONLY to searchStore. Zero interference with other components.
 
 import { useState, useRef } from "react";
-import {
-  Search, X, ChevronDown, Check,
+import { Search, X, ChevronDown, Check,
   Navigation, Star, Clock4, MapPin,
   Stethoscope, Zap, Activity
 } from "lucide-react";
 import { useSearchStore } from "../../../store/searchStore";
+import { SPECIALTIES } from "../../../utils/constants";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Static data
@@ -19,19 +19,7 @@ const TABS = [
   { id: "open",    label: "Open Now", Icon: Zap },
 ];
 
-const SPECIALTIES = [
-  { id: "all",           label: "All Specialties" },
-  { id: "General",       label: "General" },
-  { id: "Cardiology",    label: "Cardiology" },
-  { id: "Dental",        label: "Dental Care" },
-  { id: "Neurology",     label: "Neurology" },
-  { id: "Orthopedic",    label: "Orthopedic" },
-  { id: "Eye Care",      label: "Eye Care" },
-  { id: "Mental Health", label: "Mental Health" },
-  { id: "Physiotherapy", label: "Physiotherapy" },
-  { id: "Pediatrics",    label: "Pediatrics" },
-  { id: "Dermatology",   label: "Dermatology" },
-];
+
 
 const DISTANCE_OPTIONS = [
   { label: "Any",       value: null },
@@ -183,8 +171,9 @@ export default function ClinicSearchCard() {
   const sortLabel      = SORT_OPTIONS.find(s => s.id === sortBy)?.label || "Nearest";
 
   return (
-    <div className="w-full">
-      <div className="bg-white rounded-2xl overflow-visible border border-slate-200 shadow-[0_4px_24px_rgba(0,0,0,0.08)]">
+    <div className="w-full relative group z-20">
+      <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-500"></div>
+      <div className="bg-white rounded-2xl overflow-visible shadow-xl border border-white relative">
 
         {/* ── Coloured header band ──────────────────────────────────────── */}
         <div className="bg-gradient-to-r from-emerald-600 to-teal-500 rounded-t-2xl px-4 pt-4 pb-0">

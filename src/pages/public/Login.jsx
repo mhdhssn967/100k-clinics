@@ -3,12 +3,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithPopup
 } from "firebase/auth";
 import {
   doc, setDoc, getDoc, collection, query, where, getDocs, serverTimestamp,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { auth, db, storage } from "../../../firebaseConfig";
+import { auth, db, storage, googleProvider } from "../../../firebaseConfig";
 import {
   Activity, Eye, EyeOff, ArrowLeft, Loader2, AlertCircle,
   Building2, User, Camera, Phone, Mail, Lock, UserCircle2, ChevronRight,
@@ -133,7 +134,7 @@ function friendlyError(code) {
     "auth/weak-password":       "Password must be at least 6 characters.",
     "auth/user-disabled":       "This account has been disabled.",
   };
-  return map[code] ?? "Something went wrong. Please try again.";
+  return map[code] ?? `Something went wrong. Please try again.${code}`;
 }
 
 // ─────────────────────────────────────────────
@@ -141,13 +142,22 @@ function friendlyError(code) {
 // ─────────────────────────────────────────────
 async function resolveRole(uid) {
   try {
-    const q = query(collection(db, "clinics"), where("ownerUid", "==", uid));
-    const snap = await getDocs(q);
-    if (!snap.empty) return "clinic_admin";
-    const userSnap = await getDoc(doc(db, "users", uid));
-    if (userSnap.exists()) return "user";
-  } catch {}
-  return null;
+    // 1. Check direct doc ID first (Fastest)
+    const cSnap = await getDoc(doc(db, "clinics", uid));
+    if (cSnap.exists()) return "clinic_admin";
+
+    // 2. Check ownerUid if doc ID mismatched (e.g. they were made manually or via auto-ID)
+    const qSnap = await getDocs(query(collection(db, "clinics"), where("ownerUid", "==", uid)));
+    if (!qSnap.empty) return "clinic_admin";
+
+    // 3. Fallback to patient
+    const uSnap = await getDoc(doc(db, "users", uid));
+    if (uSnap.exists()) return "user";
+
+  } catch (e) {
+    console.error("resolveRole error:", e);
+  }
+  return "user"; // Default safety fallback
 }
 
 // ═════════════════════════════════════════════
@@ -205,12 +215,12 @@ export default function Login() {
     const { user } = await signInWithEmailAndPassword(auth, loginEmail, loginPwd);
 
     // 🔍 Check role from Firestore
-    const q = query(collection(db, "clinics"), where("ownerUid", "==", user.uid));
-    const clinicSnap = await getDocs(q);
+    const clinicSnap = await getDoc(doc(db, "clinics", user.uid));
+    const clinicQuerySnap = await getDocs(query(collection(db, "clinics"), where("ownerUid", "==", user.uid)));
 
     let actualRole = null;
 
-    if (!clinicSnap.empty) {
+    if (clinicSnap.exists() || !clinicQuerySnap.empty) {
       actualRole = "clinic_admin";
     } else {
       const userSnap = await getDoc(doc(db, "users", user.uid));
@@ -286,6 +296,51 @@ export default function Login() {
       setRegError(friendlyError(err.code));
     } finally {
       setRegLoading(false);
+    }
+  };
+
+  // ── Google Login (Patients only) ──
+  const handleGoogleLogin = async () => {
+    const errorSetter = tab === "login" ? setLoginError : setRegError;
+    const loaderSetter = tab === "login" ? setLoginLoading : setRegLoading;
+    errorSetter("");
+    loaderSetter(true);
+    
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      
+      // Verify role overlap 
+      const q = query(collection(db, "clinics"), where("ownerUid", "==", user.uid));
+      const clinicSnap = await getDocs(q);
+      if (!clinicSnap.empty) {
+         await auth.signOut();
+         errorSetter("This account belongs to a clinic admin. Please login from the clinic portal.");
+         return;
+      }
+      
+      const userDocRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userDocRef);
+      
+      if (!userSnap.exists()) {
+        await setDoc(userDocRef, {
+          uid:       user.uid,
+          name:      user.displayName || "Patient UI",
+          phone:     user.phoneNumber || "",
+          email:     user.email,
+          photoURL:  user.photoURL || "",
+          role:      "user",
+          createdAt: serverTimestamp(),
+          bookings:  [],
+        });
+      }
+      navigate("/user/home", { replace: true });
+    } catch (err) {
+      if (err.code !== "auth/popup-closed-by-user") {
+        errorSetter(friendlyError(err.code));
+      }
+    } finally {
+      loaderSetter(false);
     }
   };
 
@@ -401,6 +456,30 @@ export default function Login() {
                   : `Sign in as ${meta.label}`}
               </button>
 
+              {role === "user" && (
+                <div className="mt-4 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-px bg-slate-100"></div>
+                    <p className="text-[10px] uppercase tracking-widest font-bold text-slate-300">Or continue with</p>
+                    <div className="flex-1 h-px bg-slate-100"></div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    disabled={loginLoading || regLoading}
+                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-sm font-bold shadow-sm transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Google
+                  </button>
+                </div>
+              )}
+
               {meta.canRegister && (
                 <p className="text-center text-xs text-slate-400">
                   No account?{" "}
@@ -482,6 +561,30 @@ export default function Login() {
                   ? <><Loader2 size={14} className="animate-spin" /> Creating account…</>
                   : "Create Patient Account"}
               </button>
+
+              {role === "user" && (
+                <div className="mt-4 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-px bg-slate-100"></div>
+                    <p className="text-[10px] uppercase tracking-widest font-bold text-slate-300">Or continue with</p>
+                    <div className="flex-1 h-px bg-slate-100"></div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    disabled={loginLoading || regLoading}
+                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-sm font-bold shadow-sm transition-all active:scale-95 disabled:opacity-50"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    Google
+                  </button>
+                </div>
+              )}
 
               <p className="text-center text-xs text-slate-400">
                 Already registered?{" "}

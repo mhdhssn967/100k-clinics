@@ -105,7 +105,8 @@ export const useAdminStore = create((set, get) => ({
     const { clinic } = get();
     set({ saving: true });
     
-    const doctor = await svc.addDoctor(clinic.ownerUid, data, avatarFile);
+    // Pass existing doctors for speciality recalculation
+    const doctor = await svc.addDoctor(clinic.ownerUid, data, avatarFile, clinic.doctors || []);
     
     set(s => ({
       clinic: { ...s.clinic, doctors: [...(s.clinic.doctors || []), doctor] },

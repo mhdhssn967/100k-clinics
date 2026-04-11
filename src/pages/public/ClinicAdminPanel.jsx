@@ -8,7 +8,7 @@ import DoctorModal     from "../../components/admin/DoctorModal";
 import AdminToast      from "../../components/admin/AdminToast";
 import { useAdminStore } from "../../store/adminStore";
 // Import your auth hook (adjust path based on where your AuthContext is)
-import { useAuth } from "../../context/AuthContext"; 
+import { useAuth } from "../../App"; 
 
 function SectionRenderer() {
   const activeSection = useAdminStore(s => s.activeSection);

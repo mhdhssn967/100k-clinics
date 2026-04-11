@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Calendar, Clock, CalendarX } from "lucide-react";
 import { useStore } from "../../store";
+import AppointmentDetailsModal from "../../components/common/AppointmentDetailsModal";
 
 function StatusPill({ status }) {
   const styles = {
@@ -57,9 +58,9 @@ function ActiveAppointmentCard({ appt, onCancel }) {
 
         {/* Footer action */}
         <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
-          <span className="text-slate-400 text-[11px]">Tap to view details</span>
+          <button onClick={() => onSelect(appt)} className="text-slate-500 text-[11px] font-bold hover:text-emerald-600 transition-colors py-1">Tap to view details</button>
           <button
-            onClick={() => onCancel(appt.id)}
+            onClick={(e) => { e.stopPropagation(); onCancel(appt.id); }}
             className="text-rose-500 text-xs font-bold bg-rose-50 hover:bg-rose-100 transition-colors px-3 py-1.5 rounded-xl"
           >
             Cancel booking
@@ -70,11 +71,12 @@ function ActiveAppointmentCard({ appt, onCancel }) {
   );
 }
 
-function HistoryRow({ appt }) {
-
-  
+function HistoryRow({ appt, onSelect }) {
   return (
-    <div className="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50/70 transition-colors">
+    <div 
+      onClick={() => onSelect(appt)}
+      className="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-50/70 transition-colors cursor-pointer"
+    >
       <div className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs flex-shrink-0">
         {appt.doctorName?.charAt(0) ?? "D"}
       </div>
@@ -91,6 +93,7 @@ function HistoryRow({ appt }) {
 }
 
 export default function BookingsPage() {
+  const [selectedAppt, setSelectedAppt] = useState(null);
   const user = useStore((s) => s.user);
   const appointments = useStore((s) => s.appointments);
   const oldAppointments = useStore((s) => s.oldAppointments)
@@ -143,7 +146,7 @@ console.log(appointments);
           <div className="space-y-3">
             {active.length > 0 ? (
               active.map((a) => (
-                <ActiveAppointmentCard key={a.id} appt={a} onCancel={cancelAppointment} />
+                <ActiveAppointmentCard key={a.id} appt={a} onCancel={cancelAppointment} onSelect={setSelectedAppt} />
               ))
             ) : (
               <div className="bg-white rounded-3xl border border-dashed border-slate-200 px-6 py-10 flex flex-col items-center gap-3">
@@ -164,7 +167,7 @@ console.log(appointments);
           <h2 className="text-slate-500 font-bold text-xs uppercase tracking-widest mb-3 px-1">Past history</h2>
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden divide-y divide-slate-50">
             {history.length > 0 ? (
-              history.map((appt) => <HistoryRow key={appt.id} appt={appt} />)
+              history.map((appt) => <HistoryRow key={appt.id} appt={appt} onSelect={setSelectedAppt} />)
             ) : (
               <div className="px-6 py-10 text-center">
                 <p className="text-slate-400 text-xs italic">No previous history available</p>
@@ -173,6 +176,12 @@ console.log(appointments);
           </div>
         </section>
       </div>
+
+      <AppointmentDetailsModal 
+        isOpen={!!selectedAppt} 
+        onClose={() => setSelectedAppt(null)} 
+        appt={selectedAppt} 
+      />
     </div>
   );
 }

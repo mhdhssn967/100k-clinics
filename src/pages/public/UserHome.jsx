@@ -5,7 +5,6 @@ import { useSearchStore } from "../../store/searchStore";
 import HomeHeader from "../../components/layout/HomeHeader";
 import QuickStats from "../../components/common/Homepage/QuickStats";
 import UpcomingBanner from "../../components/common/Homepage/UpcomingBanner";
-import FilterChips from "../../components/common/Homepage/FilterChips";
 import ClinicList from "../../components/common/Homepage/ClinicList";
 import ClinicSearchCard from "../../components/common/Homepage/ClinicSearchCard";
 
@@ -31,28 +30,27 @@ export default function UserHome() {
       {/* Existing header — untouched */}
       <HomeHeader />
 
-      <div className="px-4 pt-4 space-y-5">
-        {/* ── Agoda-style search card — the hero ── */}
-        <ClinicSearchCard />
+      <div className="max-w-3xl mx-auto w-full -mt-6 relative z-10">
+        <div className="px-4 space-y-6">
+          {/* ── Agoda-style search card — the hero ── */}
+          <ClinicSearchCard />
 
-        {/* ── Everything below is unchanged ─────── */}
-        <div className="px-1">
-          <QuickStats />
-        </div>
-
-        <div className="px-1">
-          <UpcomingBanner />
-        </div>
-
-        {/* Clinics */}
-        <div className="px-1">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-slate-900 font-bold text-[15px]">Clinics Near You</p>
+          {/* ── Everything below is unchanged ─────── */}
+          <div className="px-1">
+            <QuickStats />
           </div>
-          <div className="mb-4">
-            <FilterChips />
+
+          <div className="px-1">
+            <UpcomingBanner />
           </div>
-          <ClinicList />
+
+          {/* Clinics */}
+          <div className="px-1">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-slate-900 font-black text-lg tracking-tight">Clinics Near You</p>
+            </div>
+            <ClinicList />
+          </div>
         </div>
       </div>
     </div>

@@ -37,7 +37,8 @@ function applyFilters(clinics, { query, sortBy, onlyOpen, specialty, maxDistance
     const sp = specialty.toLowerCase();
     result = result.filter(c =>
       c.specialty?.toLowerCase().includes(sp) ||
-      c.tags?.some(t => t.toLowerCase().includes(sp))
+      c.tags?.some(t => t.toLowerCase().includes(sp)) ||
+      c.specialities?.some(s => s.toLowerCase().includes(sp))
     );
   }
 

@@ -1,5 +1,6 @@
 // components/home/ClinicList.jsx
 import { useStore } from "../../../store";
+import { useSearchStore } from "../../../store/searchStore";
 import ClinicCard from "./ClinicCard";
 import { Hospital } from "lucide-react";
 
@@ -21,9 +22,9 @@ function SkeletonCard() {
 }
 
 export default function ClinicList() {
-  const clinics       = useStore(s => s.filteredClinics);
+  const clinics       = useSearchStore(s => s.results);
   const loading       = useStore(s => s.clinicsLoading);
-  const searchQuery   = useStore(s => s.searchQuery);
+  const searchQuery   = useSearchStore(s => s.query);
 
   if (loading) {
     return (
