@@ -5,6 +5,7 @@ import HomeHeader from "../../components/layout/HomeHeader";
 import FilterChips from "../../components/common/Homepage/FilterChips";
 import ClinicList from "../../components/common/Homepage/ClinicList";
 import ClinicSearchCard from "../../components/common/Homepage/ClinicSearchCard";
+import ClinicEnrollBanner from "../../components/common/Homepage/ClinicEnrollBanner";
 
 export default function Home() {
   const clinics     = useStore(s => s.clinics);
@@ -25,6 +26,7 @@ export default function Home() {
 
       <div className="max-w-3xl mx-auto w-full">
         <div className="px-4 pt-4 space-y-5">
+          <ClinicEnrollBanner />
           <ClinicSearchCard />
           
           <div className="px-1">
