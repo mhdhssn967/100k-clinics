@@ -40,6 +40,16 @@ const ROLE = {
   },
 };
 
+const COUNTRY_CODES = [
+  { code: "+91", label: "🇮🇳 India", iso: "IN" },
+  { code: "+1",  label: "🇺🇸 USA", iso: "US" },
+  { code: "+44", label: "🇬🇧 UK", iso: "GB" },
+  { code: "+971",label: "🇦🇪 UAE", iso: "AE" },
+  { code: "+65", label: "🇸🇬 Singapore", iso: "SG" },
+  { code: "+61", label: "🇦🇺 Australia", iso: "AU" },
+  { code: "+1",  label: "🇨🇦 Canada", iso: "CA" },
+];
+
 const ACCENT = {
   emerald: {
     badge:  "bg-emerald-50 text-emerald-700 border border-emerald-200",
@@ -186,12 +196,14 @@ export default function Login() {
   const [showLoginPwd, setShowLoginPwd] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError,   setLoginError]   = useState("");
+  const [countryCode,  setCountryCode]  = useState("+91");
   const [phone,        setPhone]        = useState("");
   const [otp,          setOtp]          = useState("");
   const [isOtpSent,    setIsOtpSent]    = useState(false);
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState(null);
   const [guestLoading, setGuestLoading] = useState(false);
+  const [isGuestFlow,  setIsGuestFlow]  = useState(false);
 
   // ── Register state (patient only) ──
   const [regName,    setRegName]    = useState("");
@@ -251,7 +263,7 @@ const handleLoginSuccess = async (user) => {
         actualRole = "user";
         await setDoc(doc(db, "users", user.uid), {
           uid: user.uid,
-          name: user.displayName || (user.isAnonymous ? "Guest Patient" : "Patient"),
+          name: isGuestFlow ? "Guest" : (user.displayName || "Patient"),
           phone: user.phoneNumber || "",
           email: user.email || "",
           photoURL: user.photoURL || "",
@@ -320,9 +332,10 @@ const handleLoginSuccess = async (user) => {
 
     try {
       if (!isOtpSent) {
-        setupRecaptcha();
+        await setupRecaptcha();
         const appVerifier = window.recaptchaVerifier;
-        const confirmation = await signInWithPhoneNumber(auth, phone, appVerifier);
+        const fullPhone = `${countryCode}${phone.replace(/\s/g, "")}`;
+        const confirmation = await signInWithPhoneNumber(auth, fullPhone, appVerifier);
         setConfirmationResult(confirmation);
         setIsOtpSent(true);
       } else {
@@ -339,8 +352,7 @@ const handleLoginSuccess = async (user) => {
   };
 
   const handleGuestLogin = async () => {
-    // This now just toggles the phone UI if we want, or stays as anonymous
-    // But since you want Mobile Number, we'll focus on that.
+    setIsGuestFlow(true);
     setTab("phone");
     setLoginError("");
   };
@@ -483,7 +495,13 @@ const handleLoginSuccess = async (user) => {
               ].map(t => (
                 <button
                   key={t.id}
-                  onClick={() => { setTab(t.id); setLoginError(""); setRegError(""); setIsOtpSent(false); }}
+                  onClick={() => { 
+                    setTab(t.id); 
+                    setLoginError(""); 
+                    setRegError(""); 
+                    setIsOtpSent(false); 
+                    setIsGuestFlow(false); 
+                  }}
                   className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest transition-all border-b-2 ${
                     tab === t.id
                       ? `${ac.tab} bg-slate-50/60`
@@ -589,15 +607,38 @@ const handleLoginSuccess = async (user) => {
             <div className="p-6 space-y-4">
               <form onSubmit={handlePhoneSignIn} className="space-y-4">
                 {!isOtpSent ? (
-                  <Field
-                    label="Mobile Number"
-                    type="tel"
-                    value={phone}
-                    onChange={setPhone}
-                    placeholder="+91 98765 43210"
-                    icon={<Phone size={14} />}
-                    required
-                  />
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mobile Number</label>
+                    <div className="flex gap-2">
+                      <div className="relative w-24 shrink-0">
+                        <select
+                          value={countryCode}
+                          onChange={(e) => setCountryCode(e.target.value)}
+                          className="w-full pl-3 pr-8 py-3 rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:border-slate-400 outline-none transition-all text-sm text-slate-900 appearance-none cursor-pointer"
+                        >
+                          {COUNTRY_CODES.map(c => (
+                            <option key={c.iso + c.code} value={c.code}>{c.code} ({c.iso})</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                          <ChevronRight size={14} className="rotate-90" />
+                        </div>
+                      </div>
+                      <div className="relative flex-1">
+                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none">
+                          <Phone size={14} />
+                        </span>
+                        <input
+                          type="tel"
+                          value={phone}
+                          onChange={e => setPhone(e.target.value)}
+                          placeholder="98765 43210"
+                          required
+                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:border-slate-400 focus:ring-2 focus:ring-offset-0 outline-none transition-all text-sm text-slate-900 placeholder:text-slate-300"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 ) : (
                   <Field
                     label="Verify OTP"
@@ -622,17 +663,20 @@ const handleLoginSuccess = async (user) => {
                     : isOtpSent ? "Verify OTP" : "Send SMS Code"}
                 </button>
                 
+                {/* reCAPTCHA centered below button */}
+                <div id="recaptcha-container" className="flex justify-center scale-90 -mt-1 origin-top"></div>
+
                 {isOtpSent && (
                   <button 
                     type="button" 
                     onClick={() => setIsOtpSent(false)}
-                    className="w-full text-[11px] text-slate-400 hover:text-slate-600 font-bold uppercase tracking-wider transition-colors"
+                    className="w-full text-[11px] text-slate-400 hover:text-slate-600 font-bold uppercase tracking-wider transition-colors mt-2"
                   >
                     Change Phone Number
                   </button>
                 )}
               </form>
-              <p className="text-center text-xs text-slate-400">
+              <p className="text-center text-xs text-slate-400 mt-2">
                 Changed your mind?{" "}
                 <button type="button" onClick={() => setTab("login")} className="font-bold text-sky-600 hover:underline">
                   Use Email instead
@@ -788,10 +832,6 @@ const handleLoginSuccess = async (user) => {
           </div>
           <ChevronRight size={13} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
         </div>
-      </div>
-      {/* reCAPTCHA anchor */}
-      <div className="flex justify-center my-4">
-        <div id="recaptcha-container"></div>
       </div>
     </div>
   );
