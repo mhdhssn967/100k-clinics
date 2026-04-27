@@ -1,14 +1,21 @@
 // pages/patient/SettingsPage.jsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   User, Bell, Shield, HelpCircle, LogOut, ChevronRight,
   Edit3, Camera, X, Check, Phone, Mail, Lock, Info,
 } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { auth } from "../../../firebaseConfig";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useStore } from "../../store";
 // ─── helpers ────────────────────────────────────────────────────────────────
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
 
 function getInitials(name = "") {
   return name
@@ -142,8 +149,16 @@ export default function SettingsPage() {
   const patientPhotoURL = profile?.photoURL || user?.photoURL || null;
   const initials = getInitials(patientName);
 
+  const location = useLocation();
   const [activeDrawer, setActiveDrawer] = useState(null); // 'profile' | 'notifications' | 'privacy' | 'help'
   const [showLogout, setShowLogout] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("open") === "profile") {
+      setActiveDrawer("profile");
+    }
+  }, [location]);
 
   const handleLogout = async () => {
     try {

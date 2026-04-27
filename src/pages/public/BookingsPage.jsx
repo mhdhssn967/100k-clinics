@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Calendar, Clock, CalendarX } from "lucide-react";
 import { useStore } from "../../store";
 import AppointmentDetailsModal from "../../components/common/AppointmentDetailsModal";
+import Swal from "sweetalert2";
 
 function StatusPill({ status }) {
   const styles = {
@@ -16,7 +17,7 @@ function StatusPill({ status }) {
   );
 }
 
-function ActiveAppointmentCard({ appt, onCancel }) {
+function ActiveAppointmentCard({ appt, onCancel, onSelect }) {
   return (
     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
       {/* Top accent bar */}
@@ -101,6 +102,31 @@ export default function BookingsPage() {
   const loadAppointments = useStore((s) => s.loadAppointments);
   const cancelAppointment = useStore((s) => s.cancelAppointment);
 
+  const handleCancel = (id) => {
+    Swal.fire({
+      title: "Cancel Appointment?",
+      text: "Are you sure you want to cancel this booking? This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#64748b",
+      confirmButtonText: "Yes, cancel it!",
+      cancelButtonText: "Keep it",
+      background: "#ffffff",
+      borderRadius: "24px",
+      customClass: {
+        popup: "rounded-[24px] border border-slate-100 shadow-xl",
+        title: "text-slate-900 font-black",
+        confirmButton: "rounded-xl font-bold px-6 py-2.5",
+        cancelButton: "rounded-xl font-bold px-6 py-2.5"
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        cancelAppointment(id);
+      }
+    });
+  };
+
   useEffect(() => {
     if (user?.uid && appointments.length === 0) {
       loadAppointments(user.uid);
@@ -146,7 +172,7 @@ console.log(appointments);
           <div className="space-y-3">
             {active.length > 0 ? (
               active.map((a) => (
-                <ActiveAppointmentCard key={a.id} appt={a} onCancel={cancelAppointment} onSelect={setSelectedAppt} />
+                <ActiveAppointmentCard key={a.id} appt={a} onCancel={handleCancel} onSelect={setSelectedAppt} />
               ))
             ) : (
               <div className="bg-white rounded-3xl border border-dashed border-slate-200 px-6 py-10 flex flex-col items-center gap-3">

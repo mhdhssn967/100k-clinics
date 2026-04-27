@@ -1,29 +1,48 @@
-// pages/patient/UserHome.jsx
 import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useStore }      from "../../store";
 import { useSearchStore } from "../../store/searchStore";
 import HomeHeader from "../../components/layout/HomeHeader";
 import QuickStats from "../../components/common/Homepage/QuickStats";
-import UpcomingBanner from "../../components/common/Homepage/UpcomingBanner";
 import ClinicList from "../../components/common/Homepage/ClinicList";
 import ClinicSearchCard from "../../components/common/Homepage/ClinicSearchCard";
+import PublicDoctorModal from "../../components/common/Homepage/PublicDoctorModal";
+import NotificationsModal from "../../components/common/Homepage/NotificationsModal";
 
 export default function UserHome() {
-
+  const navigate = useNavigate();
+  const user             = useStore(s => s.user);
   const clinics          = useStore(s => s.clinics);
   const loadClinics      = useStore(s => s.loadClinics);
   const loadAppointments = useStore(s => s.loadAppointments);
+  const loadNotifications = useStore(s => s.loadNotifications);
   const initSearch       = useSearchStore(s => s.initSearch);
+  const activeTab        = useSearchStore(s => s.activeTab);
+
+  const doctorDetailModal      = useStore(s => s.doctorDetailModal);
+  const closeDoctorDetailModal = useStore(s => s.closeDoctorDetailModal);
+  const openBookingModal       = useStore(s => s.openBookingModal);
 
   useEffect(() => {
     loadClinics();
-    loadAppointments();
   }, []);
+
+  useEffect(() => {
+    if (user?.uid) {
+      loadAppointments(user.uid);
+      loadNotifications(user.uid);
+    }
+  }, [user?.uid, loadAppointments, loadNotifications]);
 
   // One-way bridge: main store clinics → searchStore (only connection between them)
   useEffect(() => {
     if (clinics.length > 0) initSearch(clinics);
   }, [clinics]);
+
+  const handleBookDoctor = (doc) => {
+    if (!user) navigate("/login/user");
+    else openBookingModal(doctorDetailModal.clinic, doc);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 pb-28">
@@ -41,18 +60,26 @@ export default function UserHome() {
           </div>
 
           <div className="px-1">
-            <UpcomingBanner />
-          </div>
-
-          {/* Clinics */}
-          <div className="px-1">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-slate-900 font-black text-lg tracking-tight">Clinics Near You</p>
+              <p className="text-slate-900 font-black text-lg tracking-tight">
+                {activeTab === "clinic" ? "Clinics Near You" : 
+                 activeTab === "doctor" ? "Doctors Available" : 
+                 "Browse by Specialty"}
+              </p>
             </div>
             <ClinicList />
           </div>
         </div>
       </div>
+
+      <PublicDoctorModal 
+        isOpen={!!doctorDetailModal}
+        onClose={closeDoctorDetailModal}
+        doctor={doctorDetailModal?.doctor}
+        onBook={handleBookDoctor}
+      />
+
+      <NotificationsModal />
     </div>
   );
 }

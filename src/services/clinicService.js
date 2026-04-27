@@ -101,7 +101,12 @@ export async function searchClinics(searchString) {
     return allClinics.filter(c => 
       c.name?.toLowerCase().includes(q) || 
       c.specialty?.toLowerCase().includes(q) ||
-      c.address?.toLowerCase().includes(q)
+      c.specialities?.some(s => s.toLowerCase().includes(q)) ||
+      c.address?.toLowerCase().includes(q) ||
+      c.doctors?.some(d => 
+        d.name?.toLowerCase().includes(q) || 
+        d.specialty?.toLowerCase().includes(q)
+      )
     );
   } catch (error) {
     console.error("Error searching clinics:", error);

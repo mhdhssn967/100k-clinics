@@ -16,13 +16,18 @@ function applyFilters(clinics, { query, sortBy, onlyOpen, specialty, maxDistance
   let result = [...clinics];
 
   // Full-text search across name, specialty, tags, doctor names
-  if (query.trim()) {
+    if (query.trim()) {
     const q = query.toLowerCase();
     result = result.filter(c =>
       c.name?.toLowerCase().includes(q) ||
       c.specialty?.toLowerCase().includes(q) ||
+      c.specialities?.some(s => s.toLowerCase().includes(q)) ||
       c.tags?.some(t => t.toLowerCase().includes(q)) ||
-      c.doctors?.some(d => d.name?.toLowerCase().includes(q)) ||
+      c.doctors?.some(d => 
+        d.name?.toLowerCase().includes(q) || 
+        d.specialty?.toLowerCase().includes(q) ||
+        d.qualification?.toLowerCase().includes(q)
+      ) ||
       c.address?.toLowerCase().includes(q)
     );
   }
@@ -70,6 +75,7 @@ export const useSearchStore = create((set, get) => ({
   _allClinics: [],
 
   // ── Filter state ──────────────────────────────────────────────────────────
+  activeTab:   "clinic",    // "clinic" | "doctor" | "specialty"
   query:       "",
   sortBy:      "nearby",   // "nearby" | "rated" | "wait"
   onlyOpen:    false,
@@ -93,6 +99,10 @@ export const useSearchStore = create((set, get) => ({
   },
 
   // ── Actions ───────────────────────────────────────────────────────────────
+  setActiveTab: (activeTab) => {
+    set({ activeTab });
+  },
+
   setQuery: (query) => {
     set({ query });
     get()._run();

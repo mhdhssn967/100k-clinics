@@ -23,7 +23,7 @@ function Field({ label, children, required }) {
   );
 }
 
-const inputCls = "w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-300 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 bg-white transition-all";
+const inputCls = "w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-300 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 bg-white transition-all";
 
 export default function DoctorModal() {
   const modal         = useAdminStore(s => s.doctorModal);
@@ -162,7 +162,7 @@ export default function DoctorModal() {
             <div className="flex-1">
               <p className="text-slate-700 text-sm font-semibold">Doctor Photo</p>
               <p className="text-slate-400 text-xs mt-0.5 leading-relaxed">Upload a clear, professional photo. Square format works best.</p>
-              <button onClick={() => fileRef.current?.click()} className="mt-2 text-xs text-emerald-600 font-semibold">
+              <button onClick={() => fileRef.current?.click()} className="mt-2 text-xs text-blue-700 font-semibold">
                 {avatarPreview ? "Change photo" : "Upload photo"}
               </button>
             </div>
@@ -215,7 +215,7 @@ export default function DoctorModal() {
             </div>
             <button
               onClick={() => set("available", !form.available)}
-              className={`w-12 h-6 rounded-full transition-all duration-200 relative ${form.available ? "bg-emerald-500" : "bg-slate-300"}`}
+              className={`w-12 h-6 rounded-full transition-all duration-200 relative ${form.available ? "bg-blue-700" : "bg-slate-300"}`}
             >
               <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${form.available ? "left-7" : "left-1"}`} />
             </button>
@@ -269,10 +269,10 @@ export default function DoctorModal() {
             {form.timeSlots.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-3">
                 {form.timeSlots.map(slot => (
-                  <span key={slot} className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold px-2.5 py-1 rounded-lg">
+                  <span key={slot} className="flex items-center gap-1 bg-blue-50 border border-blue-200 text-blue-800 text-[11px] font-semibold px-2.5 py-1 rounded-lg">
                     <Clock size={10} />
                     {slot}
-                    <button onClick={() => removeSlot(slot)} className="text-emerald-400 hover:text-rose-500 transition-colors ml-0.5">
+                    <button onClick={() => removeSlot(slot)} className="text-blue-400 hover:text-rose-500 transition-colors ml-0.5">
                       <X size={10} strokeWidth={2.5} />
                     </button>
                   </span>

@@ -4,6 +4,13 @@ import { Search, MapPin, Bell, ChevronDown } from "lucide-react";
 import { useStore } from "../../store";
 import { useNavigate } from "react-router-dom";
 
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
 
 export default function HomeHeader() {
   const setSearchQuery = useStore(s => s.setSearchQuery);
@@ -14,6 +21,7 @@ export default function HomeHeader() {
 
   const user = useStore(s => s.user);
   const profile = useStore(s => s.profile);
+  const notifications = useStore(s => s.notifications);
     
   let payload = null;
   if (user) {
@@ -77,25 +85,34 @@ export default function HomeHeader() {
             <ChevronDown size={11} className="text-slate-400 ml-0.5" />
           </button>
           <h1 className="text-slate-900 text-xl font-bold tracking-tight">
-            {payload ? `Good morning, ${payload.patientName}` : "Welcome to 100KClinics"}
+            {payload ? `${getGreeting()}, ${payload.patientName}` : "Welcome to 100KClinics"}
           </h1>
         </div>
  
         <div className="flex items-center gap-3">
           {payload && (
             <div className="relative">
-              <button className="w-9 h-9 bg-slate-50 border border-slate-200 rounded-full flex items-center justify-center">
+              <button 
+                onClick={() => {
+                  useStore.getState().setNotificationsModal(true);
+                  useStore.getState().loadNotifications(payload.patientUid);
+                }}
+                className="w-9 h-9 bg-slate-50 border border-slate-200 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors"
+              >
                 <Bell size={15} className="text-slate-600" strokeWidth={2} />
               </button>
-              {upcoming > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-[17px] h-[17px] bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
-                  {upcoming}
+              {(notifications.filter(n => !n.read).length > 0) && (
+                <span className="absolute -top-0.5 -right-0.5 w-[17px] h-[17px] bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white pointer-events-none">
+                  {notifications.filter(n => !n.read).length}
                 </span>
               )}
             </div>
           )}
           {payload ? (
-            <div className="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center text-white text-sm font-bold overflow-hidden shrink-0">
+            <button 
+              onClick={() => navigate('/settings?open=profile')}
+              className="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center text-white text-sm font-bold overflow-hidden shrink-0 active:scale-90 transition-transform"
+            >
               {payload.patientProfileImage ? (
                 <img 
                   src={payload.patientProfileImage} 
@@ -107,7 +124,7 @@ export default function HomeHeader() {
                   {payload.patientName?.charAt(0) || "P"}
                 </span>
               )}
-            </div>
+            </button>
           ) : (
             <button
               onClick={() => navigate('/login/user')}

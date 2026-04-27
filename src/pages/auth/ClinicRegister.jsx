@@ -3,7 +3,7 @@ import { auth, db, storage } from '../../../firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, GeoPoint } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { MapPin, Camera, Loader2, Upload, CheckCircle2, AlertCircle, Navigation } from 'lucide-react';
+import { MapPin, Camera, Loader2, Upload, CheckCircle2, AlertCircle, Navigation, Plus } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
 
 
@@ -128,14 +128,16 @@ export default function ClinicRegister() {
   const [loading, setLoading] = useState(false);
   const [locStatus, setLocStatus] = useState('idle'); // idle | loading | success | error
   const [image, setImage] = useState(null);
+  const [galleryFiles, setGalleryFiles] = useState([]);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
   const [searchResults, setSearchResults] = useState([]);
   const navigate=useNavigate()
 
   const [formData, setFormData] = useState({
     name: '', regNumber: '', specialty: '',
-    email: '', phone: '', password: '',
+    email: '', phone: '', whatsapp: '', password: '',
     address: '', lat: null, lng: null,
     geoAddress: '',     // reverse-geocoded readable address
     plusCode: '',       // Google Plus Code if available
@@ -268,6 +270,14 @@ const handleSelectLocation = (place) => {
         imageUrl = await getDownloadURL(storageRef);
       }
 
+      const galleryUrls = [];
+      for (const [i, file] of galleryFiles.entries()) {
+        const gRef = ref(storage, `clinics/${clinicId}/gallery_${i}.jpg`);
+        await uploadBytes(gRef, file);
+        const url = await getDownloadURL(gRef);
+        galleryUrls.push(url);
+      }
+
       // Build the location object — GeoPoint for Firestore geo-queries
       const locationPayload = formData.lat && formData.lng
         ? {
@@ -288,9 +298,11 @@ const handleSelectLocation = (place) => {
         specialty: formData.specialty,
         email: formData.email,
         phone: formData.phone,
+        whatsapp: formData.whatsapp,
         address: formData.address,
         location: locationPayload,
         coverImage: imageUrl,
+        gallery: [imageUrl, ...galleryUrls],
         createdAt: serverTimestamp(),
         isOpen: false,
         rating: 5.0,
@@ -310,7 +322,7 @@ const handleSelectLocation = (place) => {
   };
 
   const canNext = () => {
-    if (step === 0) return formData.name.trim() && formData.regNumber.trim();
+    if (step === 0) return formData.name.trim() && formData.regNumber.trim() && image;
     if (step === 1) return formData.email.trim() && formData.password.length >= 6;
     return true;
   };
@@ -388,6 +400,47 @@ const handleSelectLocation = (place) => {
                 <Field label="Specialty / Services">
                   <Input value={formData.specialty} onChange={v => set('specialty', v)} placeholder="General Medicine, Pediatrics, Dermatology…" />
                 </Field>
+
+                {/* Additional Images */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Clinic Gallery</label>
+                    <span className="text-[10px] text-slate-400">Optional · Add more photos</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-3">
+                    {galleryFiles.map((f, i) => (
+                      <div key={i} className="relative aspect-square rounded-xl overflow-hidden group">
+                        <img src={URL.createObjectURL(f)} className="w-full h-full object-cover" alt={`Gallery ${i}`} />
+                        <button 
+                          onClick={() => setGalleryFiles(prev => prev.filter((_, idx) => idx !== i))}
+                          className="absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <AlertCircle size={12} className="rotate-45" />
+                        </button>
+                      </div>
+                    ))}
+                    {galleryFiles.length < 10 && (
+                      <button 
+                        onClick={() => galleryInputRef.current?.click()}
+                        className="aspect-square rounded-xl border-2 border-dashed border-slate-200 hover:border-slate-300 bg-slate-50 flex flex-col items-center justify-center gap-1 transition-colors"
+                      >
+                        <Plus size={16} className="text-slate-400" />
+                        <span className="text-[9px] font-bold text-slate-400 uppercase">Add</span>
+                      </button>
+                    )}
+                  </div>
+                  <input 
+                    ref={galleryInputRef} 
+                    type="file" 
+                    multiple 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={e => {
+                      const files = Array.from(e.target.files);
+                      setGalleryFiles(prev => [...prev, ...files].slice(0, 10));
+                    }} 
+                  />
+                </div>
               </div>
             )}
 
@@ -403,9 +456,14 @@ const handleSelectLocation = (place) => {
                   <Field label="Email Address" hint="Required">
                     <Input type="email" value={formData.email} onChange={v => set('email', v)} placeholder="admin@clinic.com" required />
                   </Field>
-                  <Field label="Phone Number">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field label="Phone Number" hint="For calling">
                     <Input type="tel" value={formData.phone} onChange={v => set('phone', v)} placeholder="+91 98765 43210" />
                   </Field>
+                  <Field label="WhatsApp Number" hint="For chat">
+                    <Input type="tel" value={formData.whatsapp} onChange={v => set('whatsapp', v)} placeholder="+91 98765 43210" />
+                  </Field>
+                </div>
                 </div>
 
                 <Field label="Password" hint="Min. 6 characters">

@@ -5,6 +5,7 @@ import { doc, getDoc, collection, query, where, getDocs } from "firebase/firesto
 import { auth, db } from "../firebaseConfig";
 import { useStore } from "./store/index.js";
 
+
 // Layout & Modals
 import BottomNav from "./components/layout/BottomNav.jsx";
 import BookingModal from "./components/common/Homepage/BookingModal.jsx";

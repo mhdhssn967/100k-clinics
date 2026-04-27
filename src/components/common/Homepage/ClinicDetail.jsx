@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Star, MapPin, Phone, Clock, Users, CheckCircle, ChevronDown, ChevronUp, Globe, Mail } from "lucide-react";
+import { ArrowLeft, Star, MapPin, Phone, Clock, Users, CheckCircle, ChevronDown, ChevronUp, Globe, Mail, MessageCircle } from "lucide-react";
 import { useStore } from "../../../store";
 import PublicDoctorModal from "./PublicDoctorModal";
 
@@ -10,7 +10,7 @@ function ExpandedText({ text }) {
 
   return (
     <div>
-      <p className={`text-slate-600 text-sm leading-relaxed transition-all ${!expanded && 'line-clamp-3'}`}>
+      <p className={`text-slate-700 text-[15px] leading-relaxed font-medium transition-all ${!expanded && 'line-clamp-3'}`}>
         {text}
       </p>
       {text.length > 200 && (
@@ -42,10 +42,38 @@ export default function ClinicDetail() {
 
   const [activeFilter, setActiveFilter] = useState("All");
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const scrollRef = React.useRef(null);
 
   useEffect(() => {
     if (id) loadClinicById(id);
   }, [id, loadClinicById]);
+
+  const gallery = clinic?.gallery || [clinic?.coverImage];
+
+  const goToImage = (index) => {
+    setCurrentImageIndex(index);
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        left: index * scrollRef.current.offsetWidth,
+        behavior: "smooth"
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (!gallery || gallery.length <= 1) return;
+    const interval = setInterval(() => {
+      const next = (currentImageIndex + 1) % gallery.length;
+      goToImage(next);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [gallery, currentImageIndex]);
+
+  const handleScroll = (e) => {
+    const index = Math.round(e.target.scrollLeft / e.target.offsetWidth);
+    if (index !== currentImageIndex) setCurrentImageIndex(index);
+  };
 
   if (loading) {
     return (
@@ -86,32 +114,61 @@ export default function ClinicDetail() {
 
   return (
     <div className="min-h-screen bg-white pb-32">
-      {/* Hero Revamp */}
-      <div className="relative h-[300px] overflow-hidden bg-slate-900">
-        <img 
-          src={clinic.coverImage || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80"} 
-          alt={clinic.name} 
-          className="w-full h-full object-cover opacity-80" 
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent" />
+      {/* Hero Revamp with Manual & Auto Slider */}
+      <div className="relative h-[320px] bg-slate-900">
+        <div 
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex overflow-x-auto snap-x snap-mandatory h-full scrollbar-hide"
+          style={{ scrollBehavior: 'smooth' }}
+        >
+          {gallery.map((img, i) => (
+            <div key={i} className="w-full h-full flex-shrink-0 snap-start">
+              <img 
+                src={img || "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80"} 
+                alt={`${clinic.name} ${i + 1}`} 
+                className="w-full h-full object-cover opacity-80" 
+              />
+            </div>
+          ))}
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent pointer-events-none" />
+
+        {/* Slider dots */}
+        {gallery.length > 1 && (
+          <div className="absolute bottom-24 left-6 flex gap-1.5 z-10">
+            {gallery.map((_, i) => (
+              <button 
+                key={i}
+                onClick={() => goToImage(i)}
+                className={`h-1 rounded-full transition-all ${
+                  i === currentImageIndex ? "w-6 bg-emerald-400" : "w-1.5 bg-white/40"
+                }`}
+              />
+            ))}
+          </div>
+        )}
 
         <button
           onClick={() => navigate(-1)}
-          className="absolute top-12 left-5 w-10 h-10 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full flex items-center justify-center border border-white/10 transition-colors"
+          className="absolute top-12 left-5 w-10 h-10 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full flex items-center justify-center border border-white/10 transition-colors z-20"
         >
           <ArrowLeft size={18} />
         </button>
 
-        <span className={`absolute top-12 right-5 text-[10px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm ${
+        <span className={`absolute top-12 right-5 text-[10px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm z-20 ${
           clinic.isOpen ? "bg-emerald-500 text-white" : "bg-slate-800/80 text-slate-300 backdrop-blur-md"
         }`}>
           <span className={`w-1.5 h-1.5 rounded-full ${clinic.isOpen ? "bg-white" : "bg-slate-400"}`} />
           {clinic.isOpen ? `Open till ${clinic.openUntil || 'Late'}` : "Closed"}
         </span>
 
-        <div className="absolute bottom-0 left-0 right-0 px-6 pb-6">
+        <div className="absolute bottom-0 left-0 right-0 px-6 pb-6 z-10">
           <p className="text-emerald-400 text-[11px] font-bold uppercase tracking-widest mb-1.5">{clinic.specialty}</p>
-          <h1 className="text-white text-3xl font-extrabold tracking-tight leading-tight mb-3">{clinic.name}</h1>
+          <h1 className="text-white text-3xl font-extrabold tracking-tight leading-tight mb-3">
+            {clinic.name}
+            <div className="w-12 h-1 bg-emerald-500 rounded-full mt-2" />
+          </h1>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-lg">
               <Star size={13} className="text-amber-400 fill-amber-400" />
@@ -125,16 +182,48 @@ export default function ClinicDetail() {
       </div>
 
       {/* Modern Stats Bar */}
-      <div className="grid grid-cols-3 border-b border-slate-100 bg-slate-50/50">
+      <div className="grid grid-cols-3 border-b border-slate-200 bg-slate-50/50">
         {[
-          { label: "Wait Time", value: clinic.waitTime || "N/A", Icon: Clock },
-          { label: "Doctors",   value: `${clinic.doctors?.length || 0} Expert(s)`, Icon: Users },
-          { label: "Phone",     value: clinic.phone || "N/A", Icon: Phone },
-        ].map(({ label, value, Icon }) => (
-          <div key={label} className="flex flex-col items-center justify-center gap-1.5 py-4 px-2 border-r border-slate-200 last:border-r-0 text-center">
-            <Icon size={16} className="text-emerald-500 shrink-0" />
-            <span className="text-slate-800 text-xs font-extrabold">{value}</span>
-            <span className="text-slate-400 text-[10px] tracking-wide uppercase font-semibold">{label}</span>
+          { 
+            label: "WhatsApp", 
+            value: clinic.whatsapp ? "Chat Now" : "N/A", 
+            Icon: MessageCircle, 
+            color: "text-emerald-500",
+            link: clinic.whatsapp ? `https://wa.me/${clinic.whatsapp.replace(/\D/g, '')}` : null 
+          },
+          { 
+            label: "Doctors",   
+            value: `${clinic.doctors?.length || 0} Expert(s)`, 
+            Icon: Users,
+            color: "text-emerald-500"
+          },
+          { 
+            label: "Phone",     
+            value: clinic.phone || "N/A", 
+            Icon: Phone,
+            color: "text-emerald-500",
+            link: clinic.phone ? `tel:${clinic.phone.replace(/\D/g, '')}` : null
+          },
+        ].map(({ label, value, Icon, color, link }) => (
+          <div key={label} className="border-r border-slate-200 last:border-r-0">
+            {link ? (
+              <a 
+                href={link} 
+                target={label === "WhatsApp" ? "_blank" : undefined}
+                rel={label === "WhatsApp" ? "noopener noreferrer" : undefined}
+                className="flex flex-col items-center justify-center gap-1.5 py-4 px-2 hover:bg-white transition-colors h-full text-center"
+              >
+                <Icon size={16} className={color} />
+                <span className="text-slate-800 text-xs font-extrabold">{value}</span>
+                <span className="text-slate-400 text-[10px] tracking-wide uppercase font-semibold">{label}</span>
+              </a>
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-1.5 py-4 px-2 text-center h-full">
+                <Icon size={16} className={color} />
+                <span className="text-slate-800 text-xs font-extrabold">{value}</span>
+                <span className="text-slate-400 text-[10px] tracking-wide uppercase font-semibold">{label}</span>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -146,7 +235,7 @@ export default function ClinicDetail() {
           <SectionLabel>About Clinic</SectionLabel>
           <ExpandedText text={clinic.description || clinic.tagline || "No description provided yet."} />
           
-          <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-slate-100 text-xs">
+          <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-slate-200 text-xs">
             {clinic.address && (
                <div className="flex items-start gap-2.5 text-slate-600">
                   <MapPin size={14} className="text-slate-400 mt-0.5 shrink-0" /> 

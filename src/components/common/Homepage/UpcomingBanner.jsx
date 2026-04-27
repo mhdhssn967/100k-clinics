@@ -1,6 +1,8 @@
 // components/home/UpcomingBanner.jsx
 import { Calendar, Clock, ChevronRight, X, ArrowRight } from "lucide-react";
 import { useStore } from "../../../store";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 function statusBadge(status) {
   return {
@@ -12,10 +14,38 @@ function statusBadge(status) {
 }
 
 function AppointmentCard({ appt }) {
+  const navigate = useNavigate();
   const cancelAppointment = useStore(s => s.cancelAppointment);
 
+  const handleCancel = (e) => {
+    e.stopPropagation();
+    Swal.fire({
+      title: "Cancel Appointment?",
+      text: "Do you really want to cancel this booking?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#64748b",
+      confirmButtonText: "Yes, cancel",
+      cancelButtonText: "No",
+      customClass: {
+        popup: "rounded-[24px]",
+        title: "text-slate-900 font-bold",
+        confirmButton: "rounded-xl font-bold px-6",
+        cancelButton: "rounded-xl font-bold px-6"
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        cancelAppointment(appt.id);
+      }
+    });
+  };
+
   return (
-    <div className="flex-shrink-0 w-full bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div 
+      onClick={() => navigate("/bookings")}
+      className="flex-shrink-0 w-full bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden cursor-pointer active:scale-[0.98] transition-all"
+    >
       {/* Top accent strip with clinic image */}
       <div className="relative h-24 overflow-hidden">
         <img src={appt.clinicImage} alt={appt.clinicName} className="w-full h-full object-cover" />
@@ -45,7 +75,7 @@ function AppointmentCard({ appt }) {
 
         {appt.status === "confirmed" && (
           <button
-            onClick={() => cancelAppointment(appt.id)}
+            onClick={handleCancel}
             className="flex items-center gap-1 text-[11px] text-rose-500 font-medium hover:text-rose-700 transition-colors"
           >
             <X size={11} /> Cancel
@@ -57,6 +87,7 @@ function AppointmentCard({ appt }) {
 }
 
 export default function UpcomingBanner() {
+  const navigate      = useNavigate();
   const setActivePage = useStore(s => s.setActivePage);
   const appointments  = useStore(s => s.appointments);
   const today         = new Date().toISOString().split("T")[0];
@@ -69,7 +100,7 @@ export default function UpcomingBanner() {
       <div className="flex items-center justify-between mb-3">
         <p className="text-slate-900 font-bold text-[15px]">Upcoming Appoinments</p>
         <button
-          onClick={() => setActivePage("bookings")}
+          onClick={() => navigate("/bookings")}
           className="flex items-center gap-1 text-[12px] text-emerald-600 font-semibold"
         >
           See all <ArrowRight size={13} />

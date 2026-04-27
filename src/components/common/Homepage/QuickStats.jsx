@@ -4,12 +4,13 @@ import { useStore } from "../../../store";
 
 
 export default function QuickStats() {
-  const appointments = useStore(s => s.appointments);
+  const appointments    = useStore(s => s.appointments);
+  const oldAppointments = useStore(s => s.oldAppointments);
   const today = new Date().toISOString().split("T")[0];
 
-  const upcoming  = appointments.filter(a => a.date >= today && a.status === "confirmed").length;
-  const completed = appointments.filter(a => a.status === "completed").length;
-  const total     = appointments.length;
+  const upcoming  = appointments.filter(a => a.date >= today && (a.status === "confirmed" || a.status === "active")).length;
+  const completed = oldAppointments.filter(a => a.status === "completed").length;
+  const total     = appointments.length + oldAppointments.length;
 
   const stats = [
     { label: "Upcoming",  value: upcoming,  accent: "text-amber-500" },

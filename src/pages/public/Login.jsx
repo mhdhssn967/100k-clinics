@@ -3,7 +3,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithPopup
+  signInWithPopup,
+  signInAnonymously,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
 } from "firebase/auth";
 import {
   doc, setDoc, getDoc, collection, query, where, getDocs, serverTimestamp,
@@ -133,6 +136,9 @@ function friendlyError(code) {
     "auth/invalid-email":       "Please enter a valid email address.",
     "auth/weak-password":       "Password must be at least 6 characters.",
     "auth/user-disabled":       "This account has been disabled.",
+    "auth/operation-not-allowed":"This sign-in method is not enabled. Please enable it in Firebase Console.",
+    "auth/admin-restricted-operation": "Anonymous auth might be disabled in Firebase console.",
+    "auth/invalid-app-credential": "Domain not authorized. Please add your current URL to 'Authorized Domains' in Firebase Console.",
   };
   return map[code] ?? `Something went wrong. Please try again.${code}`;
 }
@@ -180,6 +186,12 @@ export default function Login() {
   const [showLoginPwd, setShowLoginPwd] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError,   setLoginError]   = useState("");
+  const [phone,        setPhone]        = useState("");
+  const [otp,          setOtp]          = useState("");
+  const [isOtpSent,    setIsOtpSent]    = useState(false);
+  const [phoneLoading, setPhoneLoading] = useState(false);
+  const [confirmationResult, setConfirmationResult] = useState(null);
+  const [guestLoading, setGuestLoading] = useState(false);
 
   // ── Register state (patient only) ──
   const [regName,    setRegName]    = useState("");
@@ -213,7 +225,15 @@ export default function Login() {
 
   try {
     const { user } = await signInWithEmailAndPassword(auth, loginEmail, loginPwd);
+    await handleLoginSuccess(user);
+  } catch (err) {
+    setLoginError(friendlyError(err.code));
+  } finally {
+    setLoginLoading(false);
+  }
+};
 
+const handleLoginSuccess = async (user) => {
     // 🔍 Check role from Firestore
     const clinicSnap = await getDoc(doc(db, "clinics", user.uid));
     const clinicQuerySnap = await getDocs(query(collection(db, "clinics"), where("ownerUid", "==", user.uid)));
@@ -226,6 +246,20 @@ export default function Login() {
       const userSnap = await getDoc(doc(db, "users", user.uid));
       if (userSnap.exists()) {
         actualRole = "user";
+      } else {
+        // If it's a new phone user or anonymous user, create their profile as patient
+        actualRole = "user";
+        await setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          name: user.displayName || (user.isAnonymous ? "Guest Patient" : "Patient"),
+          phone: user.phoneNumber || "",
+          email: user.email || "",
+          photoURL: user.photoURL || "",
+          role: "user",
+          isAnonymous: user.isAnonymous,
+          createdAt: serverTimestamp(),
+          bookings: [],
+        });
       }
     }
 
@@ -241,7 +275,6 @@ export default function Login() {
           ? "This account belongs to a clinic admin. Please login from clinic portal."
           : "This account belongs to a patient. Please login from user portal."
       );
-
       return;
     }
 
@@ -251,13 +284,66 @@ export default function Login() {
     } else {
       navigate("/user/home", { replace: true });
     }
-
-  } catch (err) {
-    setLoginError(friendlyError(err.code));
-  } finally {
-    setLoginLoading(false);
-  }
 };
+
+  const setupRecaptcha = async () => {
+    try {
+      const container = document.getElementById('recaptcha-container');
+      if (!container) {
+        console.error("Recaptcha container not found");
+        return;
+      }
+      
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+      }
+      
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'normal', // Changed to visible for better reliability in dev
+        callback: () => { console.log("Recaptcha solved"); },
+        'expired-callback': () => {
+          console.log("Recaptcha expired");
+          if (window.recaptchaVerifier) window.recaptchaVerifier.clear();
+        }
+      });
+      // Explicitly render it
+      await window.recaptchaVerifier.render();
+    } catch (err) {
+      console.error("Recaptcha Setup Error:", err);
+    }
+  };
+
+  const handlePhoneSignIn = async (e) => {
+    e.preventDefault();
+    setLoginError("");
+    setPhoneLoading(true);
+
+    try {
+      if (!isOtpSent) {
+        setupRecaptcha();
+        const appVerifier = window.recaptchaVerifier;
+        const confirmation = await signInWithPhoneNumber(auth, phone, appVerifier);
+        setConfirmationResult(confirmation);
+        setIsOtpSent(true);
+      } else {
+        const result = await confirmationResult.confirm(otp);
+        await handleLoginSuccess(result.user);
+      }
+    } catch (err) {
+      console.error("Phone Auth Error:", err);
+      setLoginError(friendlyError(err.code));
+      if (window.recaptchaVerifier) window.recaptchaVerifier.clear();
+    } finally {
+      setPhoneLoading(false);
+    }
+  };
+
+  const handleGuestLogin = async () => {
+    // This now just toggles the phone UI if we want, or stays as anonymous
+    // But since you want Mobile Number, we'll focus on that.
+    setTab("phone");
+    setLoginError("");
+  };
 
   // ── Register submit (patients only) ──
   const handleRegister = async (e) => {
@@ -388,20 +474,23 @@ export default function Login() {
             <p className="text-xs text-slate-500 mt-1">{meta.sub}</p>
           </div>
 
-          {/* Tabs — only show for patients (clinics use /register-clinic) */}
+          {/* Tabs — Email / Register */}
           {meta.canRegister && (
             <div className="flex border-b border-slate-100">
-              {["login", "register"].map(t => (
+              {[
+                { id: "login", label: "Sign In" },
+                { id: "register", label: "Register" }
+              ].map(t => (
                 <button
-                  key={t}
-                  onClick={() => { setTab(t); setLoginError(""); setRegError(""); }}
+                  key={t.id}
+                  onClick={() => { setTab(t.id); setLoginError(""); setRegError(""); setIsOtpSent(false); }}
                   className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest transition-all border-b-2 ${
-                    tab === t
+                    tab === t.id
                       ? `${ac.tab} bg-slate-50/60`
                       : "border-transparent text-slate-400 hover:text-slate-600"
                   }`}
                 >
-                  {t === "login" ? "Sign In" : "Register"}
+                  {t.label}
                 </button>
               ))}
             </div>
@@ -409,52 +498,65 @@ export default function Login() {
 
           {/* ── LOGIN FORM ── */}
           {tab === "login" && (
-            <form onSubmit={handleLogin} className="p-6 space-y-4">
-              <Field
-                label="Email"
-                type="email"
-                value={loginEmail}
-                onChange={setLoginEmail}
-                placeholder="you@example.com"
-                icon={<Mail size={14} />}
-                required
-              />
-              <Field
-                label="Password"
-                type={showLoginPwd ? "text" : "password"}
-                value={loginPwd}
-                onChange={setLoginPwd}
-                placeholder="Your password"
-                icon={<Lock size={14} />}
-                required
-              >
-                <button
-                  type="button"
-                  tabIndex={-1}
-                  onClick={() => setShowLoginPwd(p => !p)}
-                  className="absolute right-3 text-slate-300 hover:text-slate-500 transition-colors"
+            <div className="p-6 space-y-4">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <Field
+                  label="Email"
+                  type="email"
+                  value={loginEmail}
+                  onChange={setLoginEmail}
+                  placeholder="you@example.com"
+                  icon={<Mail size={14} />}
+                  required
+                />
+                <Field
+                  label="Password"
+                  type={showLoginPwd ? "text" : "password"}
+                  value={loginPwd}
+                  onChange={setLoginPwd}
+                  placeholder="Your password"
+                  icon={<Lock size={14} />}
+                  required
                 >
-                  {showLoginPwd ? <EyeOff size={15} /> : <Eye size={15} />}
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => setShowLoginPwd(p => !p)}
+                    className="absolute right-3 text-slate-300 hover:text-slate-500 transition-colors"
+                  >
+                    {showLoginPwd ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </Field>
+
+                <ErrorBanner msg={loginError} />
+
+                <div className="flex justify-end">
+                  <button type="button" className="text-[11px] text-slate-400 hover:text-slate-700 transition-colors">
+                    Forgot password?
+                  </button>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loginLoading || !loginEmail || !loginPwd}
+                  className={`w-full py-3.5 rounded-xl text-white text-sm font-bold flex items-center justify-center gap-2 ${ac.btn} active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
+                >
+                  {loginLoading
+                    ? <><Loader2 size={14} className="animate-spin" /> Signing in…</>
+                    : `Sign in as ${meta.label}`}
                 </button>
-              </Field>
 
-              <ErrorBanner msg={loginError} />
-
-              <div className="flex justify-end">
-                <button type="button" className="text-[11px] text-slate-400 hover:text-slate-700 transition-colors">
-                  Forgot password?
-                </button>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loginLoading || !loginEmail || !loginPwd}
-                className={`w-full py-3.5 rounded-xl text-white text-sm font-bold flex items-center justify-center gap-2 ${ac.btn} active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
-              >
-                {loginLoading
-                  ? <><Loader2 size={14} className="animate-spin" /> Signing in…</>
-                  : `Sign in as ${meta.label}`}
-              </button>
+                {role === "user" && (
+                  <button
+                    type="button"
+                    onClick={() => setTab("phone")}
+                    className="w-full py-3.5 rounded-xl border-2 border-slate-100 text-slate-600 text-sm font-bold flex items-center justify-center gap-2 hover:bg-slate-50 hover:border-slate-200 transition-all active:scale-95"
+                  >
+                    <UserCircle2 size={16} className="text-slate-400" />
+                    Sign in as Guest
+                  </button>
+                )}
+              </form>
 
               {role === "user" && (
                 <div className="mt-4 space-y-4">
@@ -479,17 +581,74 @@ export default function Login() {
                   </button>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ── PHONE LOGIN FORM ── */}
+          {tab === "phone" && (
+            <div className="p-6 space-y-4">
+              <form onSubmit={handlePhoneSignIn} className="space-y-4">
+                {!isOtpSent ? (
+                  <Field
+                    label="Mobile Number"
+                    type="tel"
+                    value={phone}
+                    onChange={setPhone}
+                    placeholder="+91 98765 43210"
+                    icon={<Phone size={14} />}
+                    required
+                  />
+                ) : (
+                  <Field
+                    label="Verify OTP"
+                    type="text"
+                    value={otp}
+                    onChange={setOtp}
+                    placeholder="6-digit code"
+                    icon={<Lock size={14} />}
+                    required
+                  />
+                )}
+
+                <ErrorBanner msg={loginError} />
+
+                <button
+                  type="submit"
+                  disabled={phoneLoading || (!isOtpSent && !phone) || (isOtpSent && !otp)}
+                  className={`w-full py-3.5 rounded-xl text-white text-sm font-bold flex items-center justify-center gap-2 ${ac.btn} active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
+                >
+                  {phoneLoading
+                    ? <><Loader2 size={14} className="animate-spin" /> {isOtpSent ? "Verifying..." : "Sending OTP..."}</>
+                    : isOtpSent ? "Verify OTP" : "Send SMS Code"}
+                </button>
+                
+                {isOtpSent && (
+                  <button 
+                    type="button" 
+                    onClick={() => setIsOtpSent(false)}
+                    className="w-full text-[11px] text-slate-400 hover:text-slate-600 font-bold uppercase tracking-wider transition-colors"
+                  >
+                    Change Phone Number
+                  </button>
+                )}
+              </form>
+              <p className="text-center text-xs text-slate-400">
+                Changed your mind?{" "}
+                <button type="button" onClick={() => setTab("login")} className="font-bold text-sky-600 hover:underline">
+                  Use Email instead
+                </button>
+              </p>
+            </div>
+          )}
 
               {meta.canRegister && (
-                <p className="text-center text-xs text-slate-400">
+                <p className="text-center text-xs text-slate-400 mt-4">
                   No account?{" "}
                   <button type="button" onClick={() => setTab("register")} className="font-bold text-sky-600 hover:underline">
                     Register here
                   </button>
                 </p>
               )}
-            </form>
-          )}
 
           {/* ── REGISTER FORM (patients only) ── */}
           {tab === "register" && meta.canRegister && (
@@ -629,6 +788,10 @@ export default function Login() {
           </div>
           <ChevronRight size={13} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
         </div>
+      </div>
+      {/* reCAPTCHA anchor */}
+      <div className="flex justify-center my-4">
+        <div id="recaptcha-container"></div>
       </div>
     </div>
   );

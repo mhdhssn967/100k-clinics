@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { fetchClinics, fetchClinicById, searchClinics } from "../services/clinicService";
 import { fetchUserAppointments, createAppointment, cancelAppointment, fetchOldAppointments } from "../services/appointmentService";
+import { fetchUserNotifications, markNotificationAsRead } from "../services/notificationService";
 
 // ─── Auth Slice (New) ──────────────────────────────────────────────────────
 const authSlice = (set) => ({
@@ -159,6 +160,27 @@ const uiSlice = (set) => ({
     set({ toast: { msg, type } });
     setTimeout(() => set({ toast: null }), 3000);
   },
+  
+  doctorDetailModal: null, // { doctor, clinic }
+  openDoctorDetailModal: (doctor, clinic) => set({ doctorDetailModal: { doctor, clinic } }),
+  closeDoctorDetailModal: () => set({ doctorDetailModal: null }),
+
+  notifications: [],
+  notificationsLoading: false,
+  loadNotifications: async (userId) => {
+    if (!userId) return;
+    set({ notificationsLoading: true });
+    const data = await fetchUserNotifications(userId);
+    set({ notifications: data, notificationsLoading: false });
+  },
+  readNotification: async (id) => {
+    await markNotificationAsRead(id);
+    set(state => ({
+      notifications: state.notifications.map(n => n.id === id ? { ...n, read: true } : n)
+    }));
+  },
+  showNotificationsModal: false,
+  setNotificationsModal: (show) => set({ showNotificationsModal: show }),
 });
 
 // ─── Combined Store ────────────────────────────────────────────────────────

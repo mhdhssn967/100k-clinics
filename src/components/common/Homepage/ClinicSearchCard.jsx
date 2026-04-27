@@ -14,9 +14,9 @@ import { SPECIALTIES } from "../../../utils/constants";
 // Static data
 // ─────────────────────────────────────────────────────────────────────────────
 const TABS = [
-  { id: "clinic",  label: "Clinics",  Icon: Activity },
-  { id: "doctor",  label: "Doctors",  Icon: Stethoscope },
-  { id: "open",    label: "Open Now", Icon: Zap },
+  { id: "clinic",    label: "Clinics",      Icon: Activity },
+  { id: "doctor",    label: "Doctors",      Icon: Stethoscope },
+  { id: "specialty", label: "Specialities", Icon: Zap },
 ];
 
 
@@ -115,6 +115,8 @@ function FilterPill({ label, onRemove }) {
 // ─────────────────────────────────────────────────────────────────────────────
 export default function ClinicSearchCard() {
   // Store
+  const activeTab     = useSearchStore(s => s.activeTab);
+  const setActiveTab  = useSearchStore(s => s.setActiveTab);
   const query         = useSearchStore(s => s.query);
   const sortBy        = useSearchStore(s => s.sortBy);
   const onlyOpen      = useSearchStore(s => s.onlyOpen);
@@ -130,7 +132,6 @@ export default function ClinicSearchCard() {
   const activeFilterCount = useSearchStore(s => s.activeFilterCount);
 
   // Local UI
-  const [activeTab,       setActiveTab]       = useState("clinic");
   const [localQuery,      setLocalQuery]      = useState("");
   const [focused,         setFocused]         = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -140,10 +141,9 @@ export default function ClinicSearchCard() {
   // Tabs
   const handleTab = (id) => {
     setActiveTab(id);
-    if (id === "open")   { setOnlyOpen(true);  setSortBy("nearby"); }
-    if (id === "nearby") { setOnlyOpen(false); setSortBy("nearby"); }
-    if (id === "clinic") { setOnlyOpen(false); }
-    if (id === "doctor") { setOnlyOpen(false); }
+    if (id === "specialty") { setOnlyOpen(false); setSortBy("nearby"); }
+    if (id === "clinic")    { setOnlyOpen(false); }
+    if (id === "doctor")    { setOnlyOpen(false); }
   };
 
   // Query
@@ -230,8 +230,7 @@ export default function ClinicSearchCard() {
                 onBlur={() => setTimeout(() => { setFocused(false); setShowSuggestions(false); }, 160)}
                 placeholder={
                   activeTab === "doctor"  ? "Doctor name or specialty…"
-                  : activeTab === "open"  ? "Search open clinics…"
-                  : activeTab === "nearby"? "Search nearby clinics…"
+                  : activeTab === "specialty" ? "Search specialties…"
                   : "Clinic name, specialty, or doctor…"
                 }
                 className="flex-1 bg-transparent text-[14px] font-medium text-slate-800 placeholder-slate-400 focus:outline-none min-w-0"
@@ -380,10 +379,15 @@ export default function ClinicSearchCard() {
             className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-[14px] py-3.5 rounded-xl transition-all duration-150 flex items-center justify-center gap-2 shadow-md shadow-emerald-200/60"
           >
             <Search size={15} strokeWidth={2.5} />
-            {results.length > 0
-              ? `Show ${results.length} clinic${results.length !== 1 ? "s" : ""}`
-              : "Search Clinics"
-            }
+            {results.length > 0 ? (
+              activeTab === "doctor" 
+                ? `Show ${results.reduce((acc, c) => acc + (c.doctors?.length || 0), 0)} doctors`
+                : activeTab === "specialty"
+                ? `Show ${new Set(results.map(c => c.specialty)).size} specialities`
+                : `Show ${results.length} clinics`
+            ) : (
+              activeTab === "doctor" ? "Search Doctors" : activeTab === "specialty" ? "Search Specialities" : "Search Clinics"
+            )}
           </button>
         </div>
 
