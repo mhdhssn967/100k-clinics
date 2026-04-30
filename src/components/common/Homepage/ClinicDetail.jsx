@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Star, MapPin, Phone, Clock, Users, CheckCircle, ChevronDown, ChevronUp, Globe, Mail, MessageCircle } from "lucide-react";
+import { ArrowLeft, Star, MapPin, Phone, Clock, Users, CheckCircle, ChevronDown, ChevronUp, Globe, Mail, MessageCircle, Navigation } from "lucide-react";
 import { useStore } from "../../../store";
 import PublicDoctorModal from "./PublicDoctorModal";
 
@@ -28,6 +28,44 @@ function ExpandedText({ text }) {
 function SectionLabel({ children }) {
   return (
     <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5">{children}</p>
+  );
+}
+
+function ClinicLocationMap({ location, name }) {
+  if (!location?.lat || !location?.lng) return null;
+  
+  const { lat, lng } = location;
+  // Using a slightly wider bbox for better context
+  const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.005},${lat - 0.005},${lng + 0.005},${lat + 0.005}&layer=mapnik&marker=${lat},${lng}`;
+  const navigationUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+
+  return (
+    <div className="mt-4 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <div className="rounded-2xl overflow-hidden border border-slate-200 h-44 relative group shadow-sm hover:border-emerald-200 transition-colors">
+        <iframe
+          title="Clinic location"
+          src={mapUrl}
+          className="w-full h-full border-0 pointer-events-none"
+          loading="lazy"
+        />
+        {/* Transparent overlay to make the whole map area clickable for navigation */}
+        <div 
+          className="absolute inset-0 bg-transparent cursor-pointer" 
+          onClick={() => window.open(navigationUrl, "_blank")} 
+          title="Click to open in Google Maps"
+        />
+        <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded text-[9px] font-bold text-slate-500 border border-slate-100 shadow-sm">
+          OPEN IN MAPS
+        </div>
+      </div>
+      <button 
+        onClick={() => window.open(navigationUrl, "_blank")}
+        className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 text-[11px] font-bold hover:bg-white hover:border-emerald-300 hover:text-emerald-700 transition-all uppercase tracking-widest"
+      >
+        <Navigation size={13} className="text-emerald-500" />
+        Start Navigation
+      </button>
+    </div>
   );
 }
 
@@ -254,6 +292,9 @@ export default function ClinicDetail() {
                   <a href={`mailto:${clinic.email}`} className="hover:text-emerald-600 transition-colors">{clinic.email}</a>
                </div>
             )}
+
+            {/* Clinic Map Integration */}
+            <ClinicLocationMap location={clinic.location} name={clinic.name} />
           </div>
         </div>
 
