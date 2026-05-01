@@ -16,7 +16,8 @@ function ExpandedText({ text }) {
       {text.length > 200 && (
         <button 
           onClick={() => setExpanded(!expanded)} 
-          className="text-emerald-600 text-xs font-bold mt-1.5 flex items-center gap-1 hover:text-emerald-700 hover:underline"
+          /* Green was text-emerald-600 hover:text-emerald-700 */
+          className="text-sky-600 text-xs font-bold mt-1.5 flex items-center gap-1 hover:text-sky-700 hover:underline"
         >
           {expanded ? "Show less" : "Read more"} {expanded ? <ChevronUp size={12}/> : <ChevronDown size={12}/>}
         </button>
@@ -41,7 +42,8 @@ function ClinicLocationMap({ location, name }) {
 
   return (
     <div className="mt-4 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <div className="rounded-2xl overflow-hidden border border-slate-200 h-44 relative group shadow-sm hover:border-emerald-200 transition-colors">
+      {/* Green was hover:border-emerald-200 */}
+      <div className="rounded-2xl overflow-hidden border border-slate-200 h-44 relative group shadow-sm hover:border-sky-200 transition-colors">
         <iframe
           title="Clinic location"
           src={mapUrl}
@@ -60,9 +62,9 @@ function ClinicLocationMap({ location, name }) {
       </div>
       <button 
         onClick={() => window.open(navigationUrl, "_blank")}
-        className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 text-[11px] font-bold hover:bg-white hover:border-emerald-300 hover:text-emerald-700 transition-all uppercase tracking-widest"
+        className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 text-[11px] font-bold hover:bg-white hover:border-sky-300 hover:text-sky-700 transition-all uppercase tracking-widest"
       >
-        <Navigation size={13} className="text-emerald-500" />
+        <Navigation size={13} className="text-sky-500" />
         Start Navigation
       </button>
     </div>
@@ -180,7 +182,7 @@ export default function ClinicDetail() {
                 key={i}
                 onClick={() => goToImage(i)}
                 className={`h-1 rounded-full transition-all ${
-                  i === currentImageIndex ? "w-6 bg-emerald-400" : "w-1.5 bg-white/40"
+                  i === currentImageIndex ? "w-6 bg-sky-400" : "w-1.5 bg-white/40"
                 }`}
               />
             ))}
@@ -195,17 +197,17 @@ export default function ClinicDetail() {
         </button>
 
         <span className={`absolute top-12 right-5 text-[10px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm z-20 ${
-          clinic.isOpen ? "bg-emerald-500 text-white" : "bg-slate-800/80 text-slate-300 backdrop-blur-md"
+          clinic.isOpen ? "bg-sky-500 text-white" : "bg-slate-800/80 text-slate-300 backdrop-blur-md"
         }`}>
           <span className={`w-1.5 h-1.5 rounded-full ${clinic.isOpen ? "bg-white" : "bg-slate-400"}`} />
           {clinic.isOpen ? `Open till ${clinic.openUntil || 'Late'}` : "Closed"}
         </span>
 
         <div className="absolute bottom-0 left-0 right-0 px-6 pb-6 z-10">
-          <p className="text-emerald-400 text-[11px] font-bold uppercase tracking-widest mb-1.5">{clinic.specialty}</p>
+          <p className="text-sky-400 text-[11px] font-bold uppercase tracking-widest mb-1.5">{clinic.specialty}</p>
           <h1 className="text-white text-3xl font-extrabold tracking-tight leading-tight mb-3">
             {clinic.name}
-            <div className="w-12 h-1 bg-emerald-500 rounded-full mt-2" />
+            <div className="w-12 h-1 bg-sky-500 rounded-full mt-2" />
           </h1>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-2.5 py-1 rounded-lg">
@@ -213,7 +215,7 @@ export default function ClinicDetail() {
               <span className="text-white font-bold text-xs">{clinic.rating || "5.0"}</span>
             </div>
             <span className="text-slate-300 text-xs flex items-center gap-1.5">
-              <MapPin size={12} className="text-emerald-400" /> {clinic.distance || "Location shared"}
+              <MapPin size={12} className="text-sky-400" /> {clinic.distance || "Location shared"}
             </span>
           </div>
         </div>
@@ -226,20 +228,23 @@ export default function ClinicDetail() {
             label: "WhatsApp", 
             value: clinic.whatsapp ? "Chat Now" : "N/A", 
             Icon: MessageCircle, 
-            color: "text-emerald-500",
+            /* Green was text-emerald-500 */
+            color: "text-sky-500",
             link: clinic.whatsapp ? `https://wa.me/${clinic.whatsapp.replace(/\D/g, '')}` : null 
           },
           { 
             label: "Doctors",   
             value: `${clinic.doctors?.length || 0} Expert(s)`, 
             Icon: Users,
-            color: "text-emerald-500"
+            /* Green was text-emerald-500 */
+            color: "text-sky-500"
           },
           { 
             label: "Phone",     
             value: clinic.phone || "N/A", 
             Icon: Phone,
-            color: "text-emerald-500",
+            /* Green was text-emerald-500 */
+            color: "text-sky-500",
             link: clinic.phone ? `tel:${clinic.phone.replace(/\D/g, '')}` : null
           },
         ].map(({ label, value, Icon, color, link }) => (
@@ -281,15 +286,18 @@ export default function ClinicDetail() {
                </div>
             )}
             {clinic.website && (
-               <div className="flex items-center gap-2.5 text-emerald-600 font-bold">
-                  <Globe size={14} className="text-emerald-500 shrink-0" /> 
+               /* Green was text-emerald-600 */
+               <div className="flex items-center gap-2.5 text-sky-600 font-bold">
+                  {/* Green was text-emerald-500 */}
+                  <Globe size={14} className="text-sky-500 shrink-0" /> 
                   <a href={`https://${clinic.website.replace(/^https?:\/\//, '')}`} target="_blank" rel="noopener noreferrer">{clinic.website}</a>
                </div>
             )}
             {clinic.email && (
                <div className="flex items-center gap-2.5 text-slate-600 font-medium">
                   <Mail size={14} className="text-slate-400 shrink-0" /> 
-                  <a href={`mailto:${clinic.email}`} className="hover:text-emerald-600 transition-colors">{clinic.email}</a>
+                  {/* Green was hover:text-emerald-600 */}
+                  <a href={`mailto:${clinic.email}`} className="hover:text-sky-600 transition-colors">{clinic.email}</a>
                </div>
             )}
 
@@ -304,8 +312,10 @@ export default function ClinicDetail() {
             <SectionLabel>Facilities & Amenities</SectionLabel>
             <div className="flex flex-wrap gap-2.5 text-[11px] font-semibold text-slate-600">
               {clinic.facilities.map(f => (
-                <span key={f} className="flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-100 px-3.5 py-1.5 rounded-full">
-                  <CheckCircle size={12} className="text-emerald-600" /> {f}
+                /* Green was bg-emerald-50 text-emerald-800 border border-emerald-100 */
+                <span key={f} className="flex items-center gap-1.5 bg-sky-50 text-sky-800 border border-sky-100 px-3.5 py-1.5 rounded-full">
+                  {/* Green was text-emerald-600 */}
+                  <CheckCircle size={12} className="text-sky-600" /> {f}
                 </span>
               ))}
             </div>
@@ -342,11 +352,12 @@ export default function ClinicDetail() {
                   <div key={spec}>
                      <h3 className="text-[13px] font-extrabold text-slate-800 mb-3 uppercase tracking-wider">{spec}</h3>
                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {doctors.map(doc => (
+                         {doctors.map(doc => (
                            <div 
                              key={doc.id}
                              onClick={() => setSelectedDoctor(doc)}
-                             className="flex items-center justify-between bg-white rounded-2xl p-4 border border-slate-200 shadow-sm hover:border-emerald-300 hover:shadow-md transition-all cursor-pointer group"
+                             /* Green was hover:border-emerald-300 */
+                             className="flex items-center justify-between bg-white rounded-2xl p-4 border border-slate-200 shadow-sm hover:border-sky-300 hover:shadow-md transition-all cursor-pointer group"
                            >
                               <div className="flex items-center gap-3.5 min-w-0">
                                  <div className="relative shrink-0">
@@ -356,7 +367,8 @@ export default function ClinicDetail() {
                                       className="w-[52px] h-[52px] rounded-xl object-cover bg-slate-100 group-hover:scale-105 transition-transform" 
                                    />
                                    <span className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${
-                                      doc.available ? "bg-emerald-500" : "bg-slate-300"
+                                      /* Green was bg-emerald-500 */
+                                      doc.available ? "bg-sky-500" : "bg-slate-300"
                                    }`} />
                                  </div>
                                  <div className="min-w-0">
@@ -364,8 +376,9 @@ export default function ClinicDetail() {
                                    <p className="text-[11px] text-slate-500 mt-0.5 tracking-wide truncate">{doc.experience || "New"} experience</p>
                                  </div>
                               </div>
-                              <div className="w-8 h-8 rounded-full bg-slate-50 group-hover:bg-emerald-50 border border-slate-100 group-hover:border-emerald-100 flex items-center justify-center shrink-0 transition-colors">
-                                <ChevronDown size={14} className="text-slate-400 group-hover:text-emerald-500 -rotate-90" />
+                              {/* Green was group-hover:bg-emerald-50 group-hover:border-emerald-100 group-hover:text-emerald-500 */}
+                              <div className="w-8 h-8 rounded-full bg-slate-50 group-hover:bg-sky-50 border border-slate-100 group-hover:border-sky-100 flex items-center justify-center shrink-0 transition-colors">
+                                <ChevronDown size={14} className="text-slate-400 group-hover:text-sky-500 -rotate-90" />
                               </div>
                            </div>
                         ))}

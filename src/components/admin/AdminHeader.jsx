@@ -57,13 +57,15 @@ export default function AdminHeader({ clinicId }) {
 
           <button
             onClick={toggleOpen}
+            /* Green was bg-emerald-50 text-emerald-700 border border-emerald-200 */
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
               clinic.isOpen
-                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                ? "bg-sky-50 text-sky-700 border border-sky-200"
                 : "bg-slate-100 text-slate-500 border border-slate-200"
             }`}
           >
-            <span className={`w-2 h-2 rounded-full transition-colors ${clinic.isOpen ? "bg-emerald-500" : "bg-slate-400"}`} />
+            {/* Green was bg-emerald-500 */}
+            <span className={`w-2 h-2 rounded-full transition-colors ${clinic.isOpen ? "bg-sky-500" : "bg-slate-400"}`} />
             {clinic.isOpen ? "Open" : "Closed"}
           </button>
         </div>

@@ -51,9 +51,11 @@ function DoctorSlotManager({ doctor }) {
           <div className="flex flex-wrap gap-1.5">
             {slots.length === 0 && <span className="text-slate-300 text-xs italic">No slots set</span>}
             {slots.map(s => (
-              <span key={s} className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold px-2.5 py-1 rounded-lg">
+              /* Green was bg-emerald-50 border-emerald-200 text-emerald-700 */
+              <span key={s} className="flex items-center gap-1 bg-sky-50 border border-sky-200 text-sky-700 text-[11px] font-semibold px-2.5 py-1 rounded-lg">
                 {s}
-                <button onClick={() => removeSlot(s)} className="text-emerald-300 hover:text-rose-500 transition-colors ml-0.5 text-[10px] font-bold">×</button>
+                {/* Green was text-emerald-300 */}
+                <button onClick={() => removeSlot(s)} className="text-sky-300 hover:text-rose-500 transition-colors ml-0.5 text-[10px] font-bold">×</button>
               </span>
             ))}
           </div>
@@ -80,10 +82,11 @@ function DoctorSlotManager({ doctor }) {
           <div className="flex gap-2">
             <input
               value={customSlot}
-              onChange={e => setCustomSlot(e.target.value)}
+               onChange={e => setCustomSlot(e.target.value)}
               onKeyDown={e => e.key === "Enter" && addCustom()}
               placeholder="Custom e.g. 2:30 PM"
-              className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 placeholder-slate-300 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+              /* Green was focus:border-emerald-400 focus:ring-emerald-100 */
+              className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 placeholder-slate-300 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
             />
             <button
               onClick={addCustom}
@@ -120,8 +123,9 @@ function DoctorCard({ doctor }) {
           <button
             onClick={() => toggleDoctorAvailability(doctor.id)}
             title={doctor.available ? "Mark as unavailable" : "Mark as available"}
+            /* Green was bg-emerald-500 */
             className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center transition-colors ${
-              doctor.available ? "bg-emerald-500" : "bg-slate-300"
+              doctor.available ? "bg-sky-500" : "bg-slate-300"
             }`}
           >
             {doctor.available && <Check size={9} className="text-white" strokeWidth={3} />}
@@ -133,7 +137,8 @@ function DoctorCard({ doctor }) {
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <p className="text-slate-900 font-bold text-sm leading-tight truncate">{doctor.name}</p>
-              <p className="text-emerald-600 text-xs font-medium mt-0.5">{doctor.specialty}</p>
+              {/* Green was text-emerald-600 */}
+              <p className="text-sky-600 text-xs font-medium mt-0.5">{doctor.specialty}</p>
               {doctor.qualification && (
                 <p className="text-slate-400 text-xs mt-0.5">{doctor.qualification}</p>
               )}
@@ -175,7 +180,8 @@ function DoctorCard({ doctor }) {
             )}
             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
               doctor.available
-                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                /* Green was bg-emerald-50 text-emerald-700 border border-emerald-200 */
+                ? "bg-sky-50 text-sky-700 border border-sky-200"
                 : "bg-slate-100 text-slate-400 border border-slate-200"
             }`}>
               {doctor.available ? "Available" : "Unavailable"}

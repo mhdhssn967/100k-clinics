@@ -33,7 +33,8 @@ function InlineEdit({ label, value, onSave, placeholder, hint, isTextArea }) {
                 onKeyDown={e => { if (e.key === "Escape") cancel(); }}
                 placeholder={placeholder}
                 rows={4}
-                className="w-full border border-emerald-400 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-100 resize-none"
+                /* Green was border-emerald-400 focus:ring-emerald-100 */
+                className="w-full border border-sky-400 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-100 resize-none"
               />
             ) : (
               <input
@@ -42,11 +43,13 @@ function InlineEdit({ label, value, onSave, placeholder, hint, isTextArea }) {
                 onChange={e => setDraft(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter") save(); if (e.key === "Escape") cancel(); }}
                 placeholder={placeholder}
-                className="flex-1 border border-emerald-400 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                /* Green was border-emerald-400 focus:ring-emerald-100 */
+                className="flex-1 border border-sky-400 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-100"
               />
             )}
             <div className="flex items-center gap-2">
-              <button onClick={save} className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center">
+              {/* Green was bg-emerald-600 */}
+              <button onClick={save} className="w-8 h-8 bg-sky-600 rounded-xl flex items-center justify-center">
                 <Check size={13} className="text-white" strokeWidth={3} />
               </button>
               <button onClick={cancel} className="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center">
@@ -105,7 +108,8 @@ export default function SettingsSection() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-slate-900 font-semibold text-sm">Clinic is currently</p>
-              <p className={`text-sm font-bold mt-0.5 ${clinic.isOpen ? "text-emerald-600" : "text-slate-500"}`}>
+              {/* Green was text-emerald-600 */}
+              <p className={`text-sm font-bold mt-0.5 ${clinic.isOpen ? "text-sky-600" : "text-slate-500"}`}>
                 {clinic.isOpen ? "🟢 Open for bookings" : "⚫ Closed"}
               </p>
             </div>
@@ -114,7 +118,8 @@ export default function SettingsSection() {
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
                 clinic.isOpen
                   ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                  : "bg-emerald-600 text-white hover:bg-emerald-700"
+                  /* Green was bg-emerald-600 hover:bg-emerald-700 */
+                  : "bg-sky-600 text-white hover:bg-sky-700"
               }`}
             >
               <Power size={14} />

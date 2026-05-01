@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 
 function StatusPill({ status }) {
   const styles = {
-    confirmed: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
+    confirmed: "bg-sky-50 text-sky-700 ring-1 ring-sky-200",
     completed: "bg-slate-100 text-slate-500 ring-1 ring-slate-200",
     cancelled: "bg-rose-50 text-rose-500 ring-1 ring-rose-200",
   };
@@ -21,10 +21,11 @@ function ActiveAppointmentCard({ appt, onCancel, onSelect }) {
   return (
     <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
       {/* Top accent bar */}
-      <div className="h-1 w-full bg-gradient-to-r from-emerald-400 to-teal-400" />
-
-      <div className="p-5">
+      <div className="h-1 w-full bg-gradient-to-r from-[#74C7F8] to-sky-500" />
+<div className="text-[12px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono font-bold" style={{width:'fit-content',marginLeft:'10px',marginTop:'10px'}}>{appt.bookingCode}</div>
+      <div className="pt-2 pe-5 ps-5 py-3">
         {/* Header */}
+        
         <div className="flex items-start gap-3 mb-5">
           <img
             src={appt.clinicImage}
@@ -34,8 +35,11 @@ function ActiveAppointmentCard({ appt, onCancel, onSelect }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h3 className="text-slate-900 font-bold text-sm leading-tight">{appt.clinicName}</h3>
-                <p className="text-emerald-600 text-[11px] font-semibold uppercase tracking-widest mt-0.5">
+                <div className="flex items-center gap-2">
+                   <h3 className="text-slate-900 font-bold text-sm leading-tight">{appt.clinicName}</h3>
+                   
+                </div>
+                <p className="text-sky-600 text-[11px] font-semibold uppercase tracking-widest mt-0.5">
                   {appt.doctorSpecialty}
                 </p>
               </div>
@@ -48,18 +52,18 @@ function ActiveAppointmentCard({ appt, onCancel, onSelect }) {
         {/* Info pills */}
         <div className="flex gap-2 flex-wrap mb-5">
           <div className="flex items-center gap-1.5 bg-slate-50 rounded-xl px-3 py-2">
-            <Calendar size={13} className="text-emerald-500" />
+            <Calendar size={13} className="text-sky-500" />
             <span className="text-slate-700 text-xs font-medium">{appt.date}</span>
           </div>
           <div className="flex items-center gap-1.5 bg-slate-50 rounded-xl px-3 py-2">
-            <Clock size={13} className="text-emerald-500" />
+            <Clock size={13} className="text-sky-500" />
             <span className="text-slate-700 text-xs font-medium">{appt.time}</span>
           </div>
         </div>
 
         {/* Footer action */}
         <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
-          <button onClick={() => onSelect(appt)} className="text-slate-500 text-[11px] font-bold hover:text-emerald-600 transition-colors py-1">Tap to view details</button>
+          <button onClick={() => onSelect(appt)} className="text-slate-500 text-[11px] font-bold hover:text-sky-600 transition-colors py-1">Tap to view details</button>
           <button
             onClick={(e) => { e.stopPropagation(); onCancel(appt.id); }}
             className="text-rose-500 text-xs font-bold bg-rose-50 hover:bg-rose-100 transition-colors px-3 py-1.5 rounded-xl"
@@ -143,7 +147,8 @@ console.log(appointments);
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-3">
-        <div className="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+        {/* Green was border-emerald-400 */}
+        <div className="w-8 h-8 border-2 border-sky-400 border-t-transparent rounded-full animate-spin" />
         <p className="text-slate-400 text-sm">Loading your schedule…</p>
       </div>
     );
@@ -153,10 +158,12 @@ console.log(appointments);
     <div className="min-h-screen bg-slate-50 pb-24">
       {/* Header */}
       <div className="bg-slate-900 px-6 pt-16 pb-10 rounded-b-[36px]">
-        <p className="text-emerald-400 text-xs font-bold uppercase tracking-widest mb-1">Schedule</p>
+        {/* Green was text-emerald-400 */}
+        <p className="text-sky-400 text-xs font-bold uppercase tracking-widest mb-1">Schedule</p>
         <h1 className="text-white text-2xl font-bold leading-tight">Your Appointments</h1>
         <div className="flex items-center gap-2 mt-3">
-          <span className="bg-emerald-500/20 text-emerald-400 text-xs font-semibold px-3 py-1 rounded-full">
+          {/* Green was bg-emerald-500/20 text-emerald-400 */}
+          <span className="bg-sky-500/20 text-sky-400 text-xs font-semibold px-3 py-1 rounded-full">
             {active.length} upcoming
           </span>
           <span className="bg-white/10 text-slate-300 text-xs font-semibold px-3 py-1 rounded-full">

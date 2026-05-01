@@ -11,7 +11,11 @@ export default function AppointmentDetailsModal({ isOpen, onClose, appt }) {
       <div className="relative bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-          <h2 className="text-lg font-bold text-slate-900 tracking-tight">Booking Details</h2>
+          <div className="flex items-center gap-3">
+             <h2 className="text-lg font-bold text-slate-900 tracking-tight">Booking Details</h2>
+             {/* Green was text-emerald-600 bg-emerald-100 */}
+             <span className="text-[10px] font-mono text-sky-600 font-bold bg-sky-100 px-2 py-0.5 rounded-lg">{appt.bookingCode}</span>
+          </div>
           <button 
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
@@ -26,7 +30,8 @@ export default function AppointmentDetailsModal({ isOpen, onClose, appt }) {
           {/* Status & Date */}
           <div className="flex items-center justify-between">
             <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
-               appt.status === 'completed' ? 'bg-emerald-100 text-emerald-700' :
+               /* Green was bg-emerald-100 text-emerald-700 */
+               appt.status === 'completed' ? 'bg-sky-100 text-sky-700' :
                appt.status === 'cancelled' ? 'bg-rose-100 text-rose-700' :
                'bg-sky-100 text-sky-700' // Confirmed/Pending
             }`}>
@@ -65,7 +70,7 @@ export default function AppointmentDetailsModal({ isOpen, onClose, appt }) {
             <div>
                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><Stethoscope size={12}/> Doctor</p>
                <p className="text-sm font-bold text-slate-900">{appt.doctorName}</p>
-               <p className="text-[11px] text-emerald-600 font-medium">{appt.doctorSpecialty}</p>
+               <p className="text-[11px] text-sky-600 font-medium">{appt.doctorSpecialty}</p>
             </div>
             <div>
                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5"><MapPin size={12}/> Clinic</p>

@@ -9,11 +9,11 @@ function Step({ number, label, done }) {
   return (
     <div className="flex items-center gap-2">
       <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors ${
-        done ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-400"
+        done ? "bg-sky-500 text-white" : "bg-slate-100 text-slate-400"
       }`}>
         {done ? <Check size={10} strokeWidth={3} /> : number}
       </div>
-      <span className={`text-xs font-medium ${done ? "text-emerald-600" : "text-slate-400"}`}>{label}</span>
+      <span className={`text-xs font-medium ${done ? "text-sky-600" : "text-slate-400"}`}>{label}</span>
     </div>
   );
 }
@@ -25,7 +25,7 @@ function DoctorOption({ doctor, selected, onSelect }) {
       disabled={!doctor.available}
       className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-150 ${
         selected
-          ? "border-emerald-500 bg-emerald-50/50 shadow-sm"
+          ? "border-sky-400 bg-sky-50/50 shadow-sm"
           : "border-slate-200 bg-white hover:border-slate-300"
       } ${!doctor.available ? "opacity-40 cursor-not-allowed" : ""}`}
     >
@@ -35,7 +35,7 @@ function DoctorOption({ doctor, selected, onSelect }) {
         <p className="text-slate-400 text-xs mt-0.5">{doctor.specialty} · {doctor.experience}</p>
       </div>
       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-        selected ? "border-emerald-500 bg-emerald-500" : "border-slate-300"
+        selected ? "border-sky-500 bg-sky-500" : "border-slate-300"
       }`}>
         {selected && <Check size={10} className="text-white" strokeWidth={3} />}
       </div>
@@ -75,31 +75,45 @@ export default function BookingModal() {
   const [patientAge,     setPatientAge]     = useState("");
   const [patientGender,  setPatientGender]  = useState("");
   const [issue,          setIssue]          = useState("");
+  const [manualEmail,    setManualEmail]    = useState("");
   const [loading,        setLoading]        = useState(false);
   
   if (!bookingModal) return null;
   const { clinic } = bookingModal;
 
+  // 1. Better email detection logic (Strict check for non-empty strings)
+  const hasAutoEmail = !!((user?.email && user.email.trim()) || (profile?.email && profile.email.trim()));
+  const userEmail = (user?.email?.trim() || profile?.email?.trim() || manualEmail?.trim());
+
+  console.log("[BookingDebug] Email check:", { 
+    authEmail: user?.email, 
+    profileEmail: profile?.email, 
+    manualEmail, 
+    hasAutoEmail,
+    finalEmail: userEmail 
+  });
+
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const minDate = tomorrow.toISOString().split("T")[0];
-  console.log("saddsf",selectedDoctor, selectedSlot, selectedDate, user);
+  
   const canBook = !!(
     selectedDoctor && 
     selectedSlot && 
     selectedDate && 
     user && 
+    userEmail && // Must have a non-empty email
     patientName.trim() && 
     patientAge && 
     patientGender && 
     issue.trim()
   );
 
-  console.log(canBook)
-
   const handleBook = async () => {
     if (!canBook) {
         if (!user) showToast("Please login to book", "error");
+        else if (!userEmail) showToast("Valid email required for confirmation", "error");
+        else showToast("Please fill all required fields", "error");
         return;
     }
 
@@ -111,6 +125,7 @@ export default function BookingModal() {
           <p><strong>Doctor:</strong> ${selectedDoctor.name}</p>
           <p><strong>Time:</strong> ${selectedDate} at ${selectedSlot}</p>
           <p><strong>Patient:</strong> ${patientName.trim()} (${patientAge}y, ${patientGender})</p>
+          <p><strong>Email:</strong> ${userEmail}</p>
         </div>
       `,
       icon: 'question',
@@ -130,6 +145,7 @@ export default function BookingModal() {
       // Patient Info
       patientUid: user.uid,
       patientName: patientName.trim(),
+      patientEmail: userEmail, 
       patientAge: patientAge,
       patientGender: patientGender,
       patientPhone: profile?.phone || "",
@@ -138,6 +154,7 @@ export default function BookingModal() {
       // Clinic Info
       clinicId: clinic.id, 
       clinicName: clinic.name,
+      clinicEmail: clinic.email, 
       clinicAddress: clinic.address, 
       clinicImage: clinic.coverImage,
 
@@ -219,7 +236,8 @@ export default function BookingModal() {
               min={minDate}
               value={selectedDate}
               onChange={e => setSelectedDate(e.target.value)}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all"
+              /* Green was focus:border-emerald-400 focus:ring-emerald-100 */
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition-all"
             />
           </div>
 
@@ -250,8 +268,23 @@ export default function BookingModal() {
                 value={patientName}
                 onChange={e => setPatientName(e.target.value)}
                 placeholder="Patient Full Name"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all bg-slate-50 focus:bg-white"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition-all bg-slate-50 focus:bg-white"
               />
+
+              {/* Show email field only if not detected automatically */}
+              {!hasAutoEmail && (
+                <div className="space-y-1.5">
+                   <p className="text-[10px] text-sky-600 font-bold uppercase ml-1">Email for Confirmation</p>
+                   <input
+                    type="email"
+                    value={manualEmail}
+                    onChange={e => setManualEmail(e.target.value)}
+                    placeholder="Enter your email address"
+                    className="w-full border border-sky-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition-all bg-sky-50/30 focus:bg-white"
+                  />
+                </div>
+              )}
+
               <div className="flex gap-3">
                 <input
                   type="number"
@@ -260,12 +293,12 @@ export default function BookingModal() {
                   placeholder="Age"
                   min="0"
                   max="120"
-                  className="w-1/3 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all bg-slate-50 focus:bg-white"
+                  className="w-1/3 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition-all bg-slate-50 focus:bg-white"
                 />
                 <select
                   value={patientGender}
                   onChange={e => setPatientGender(e.target.value)}
-                  className={`w-2/3 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all bg-slate-50 focus:bg-white ${!patientGender ? "text-slate-400" : "text-slate-700"}`}
+                  className={`w-2/3 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition-all bg-slate-50 focus:bg-white ${!patientGender ? "text-slate-400" : "text-slate-700"}`}
                 >
                   <option value="" disabled>Select Gender</option>
                   <option value="Male" className="text-slate-700">Male</option>
@@ -278,7 +311,7 @@ export default function BookingModal() {
                 onChange={e => setIssue(e.target.value)}
                 rows={2}
                 placeholder="Reason for visit / Main symptoms..."
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 resize-none transition-all bg-slate-50 focus:bg-white"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 resize-none transition-all bg-slate-50 focus:bg-white"
               />
             </div>
           </div>
@@ -286,8 +319,8 @@ export default function BookingModal() {
           {/* Summary chip (shows when all selected) */}
           {canBook && (
             <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 flex items-center gap-3">
-              <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <Check size={14} className="text-emerald-600" strokeWidth={2.5} />
+              <div className="w-8 h-8 bg-sky-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Check size={14} className="text-sky-600" strokeWidth={2.5} />
               </div>
               <div className="min-w-0">
                 <p className="text-slate-800 text-xs font-semibold truncate">{selectedDoctor?.name}</p>

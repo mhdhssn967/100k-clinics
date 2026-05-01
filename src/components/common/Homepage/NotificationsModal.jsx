@@ -15,7 +15,8 @@ export default function NotificationsModal() {
 
   const getIcon = (type) => {
     switch (type) {
-      case "booking": return <Calendar size={16} className="text-emerald-500" />;
+      /* Green was text-emerald-500 */
+      case "booking": return <Calendar size={16} className="text-sky-500" />;
       case "alert": return <AlertTriangle size={16} className="text-rose-500" />;
       case "info": return <Info size={16} className="text-blue-500" />;
       default: return <Bell size={16} className="text-slate-400" />;
@@ -29,7 +30,8 @@ export default function NotificationsModal() {
       <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden animate-pageIn">
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-emerald-600">
+            {/* Green was text-emerald-600 */}
+            <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-sky-600">
               <Bell size={20} />
             </div>
             <div>
@@ -50,7 +52,8 @@ export default function NotificationsModal() {
         <div className="max-h-[60vh] overflow-y-auto scrollbar-hide py-2">
           {loading ? (
             <div className="p-10 text-center space-y-3">
-              <div className="w-8 h-8 border-4 border-emerald-100 border-t-emerald-500 rounded-full animate-spin mx-auto" />
+              {/* Green was border-emerald-100 border-t-emerald-500 */}
+              <div className="w-8 h-8 border-4 border-sky-100 border-t-sky-500 rounded-full animate-spin mx-auto" />
               <p className="text-slate-400 text-xs font-medium uppercase tracking-widest">Loading...</p>
             </div>
           ) : notifications.length > 0 ? (
@@ -58,12 +61,14 @@ export default function NotificationsModal() {
               <button
                 key={n.id}
                 onClick={() => !n.read && readNotification(n.id)}
+                /* Green was bg-emerald-50/30 */
                 className={`w-full text-left px-6 py-4 transition-colors border-b border-slate-50 last:border-0 flex gap-4 ${
-                  !n.read ? "bg-emerald-50/30" : "bg-white opacity-70"
+                  !n.read ? "bg-sky-50/30" : "bg-white opacity-70"
                 }`}
               >
                 <div className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center ${
-                  !n.read ? "bg-white shadow-sm border border-emerald-100" : "bg-slate-50"
+                  /* Green was border-emerald-100 */
+                  !n.read ? "bg-white shadow-sm border border-sky-100" : "bg-slate-50"
                 }`}>
                   {getIcon(n.type)}
                 </div>
@@ -81,7 +86,8 @@ export default function NotificationsModal() {
                   </p>
                 </div>
                 {!n.read && (
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full mt-1.5 flex-shrink-0" />
+                  /* Green was bg-emerald-500 */
+                  <div className="w-2 h-2 bg-sky-500 rounded-full mt-1.5 flex-shrink-0" />
                 )}
               </button>
             ))

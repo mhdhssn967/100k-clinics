@@ -31,7 +31,8 @@ function EditableField({ label, value, onSave, multiline = false, placeholder = 
               value={draft}
               onChange={e => setDraft(e.target.value)}
               onKeyDown={handleKey}
-              className="flex-1 text-sm text-slate-800 border border-emerald-400 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-100 resize-none bg-white"
+              /* Green was border-emerald-400 focus:ring-emerald-100 */
+              className="flex-1 text-sm text-slate-800 border border-sky-400 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-100 resize-none bg-white"
             />
           ) : (
             <input
@@ -40,10 +41,12 @@ function EditableField({ label, value, onSave, multiline = false, placeholder = 
               onChange={e => setDraft(e.target.value)}
               onKeyDown={handleKey}
               placeholder={placeholder}
-              className="flex-1 text-sm text-slate-800 border border-emerald-400 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-100 bg-white"
+              /* Green was border-emerald-400 focus:ring-emerald-100 */
+              className="flex-1 text-sm text-slate-800 border border-sky-400 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-100 bg-white"
             />
           )}
-          <button onClick={handleSave} className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0">
+          {/* Green was bg-emerald-600 */}
+          <button onClick={handleSave} className="w-8 h-8 bg-sky-600 rounded-xl flex items-center justify-center flex-shrink-0">
             <Check size={14} className="text-white" strokeWidth={3} />
           </button>
           <button onClick={() => { setDraft(value); setEditing(false); }} className="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -104,7 +107,8 @@ function FacilitiesEditor() {
           onChange={e => setNewItem(e.target.value)}
           onKeyDown={e => e.key === "Enter" && add()}
           placeholder="Add facility (e.g. ICU, Lab…)"
-          className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+          /* Green was focus:border-emerald-400 focus:ring-emerald-100 */
+          className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100"
         />
         <button
           onClick={add}
@@ -157,14 +161,16 @@ export default function OverviewSection() {
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleCoverFile} />
 
         {/* Live status badge on cover */}
+        {/* Green was bg-emerald-500 */}
         <div className={`absolute top-3 left-3 flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full ${
-          clinic.isOpen ? "bg-emerald-500 text-white" : "bg-slate-800/80 text-white/80"
+          clinic.isOpen ? "bg-sky-500 text-white" : "bg-slate-800/80 text-white/80"
         }`}>
           <span className={`w-1.5 h-1.5 rounded-full ${clinic.isOpen ? "bg-white" : "bg-slate-400"}`} />
           {clinic.isOpen ? `Open · till ${clinic.openUntil || '--'}` : "Closed"}
         </div>
       </div>
-      <button onClick={()=>{navigate('/clinic/appointments')}} className="text-center w-full bg-emerald-600 border-emerald-800 border-1 text-white flex justify-center gap-2 p-3 rounded-2xl"><Clock10Icon/> View Appointments</button>
+      {/* Green was bg-emerald-600 border-emerald-800 */}
+      <button onClick={()=>{navigate('/clinic/appointments')}} className="text-center w-full bg-sky-600 border-sky-800 border-1 text-white flex justify-center gap-2 p-3 rounded-2xl"><Clock10Icon/> View Appointments</button>
 
       {/* Editable meta fields */}
       <div className="bg-white border border-slate-100 rounded-2xl divide-y divide-slate-50 shadow-sm overflow-hidden">

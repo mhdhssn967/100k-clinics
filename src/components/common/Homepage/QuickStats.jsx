@@ -14,7 +14,8 @@ export default function QuickStats() {
 
   const stats = [
     { label: "Upcoming",  value: upcoming,  accent: "text-amber-500" },
-    { label: "Completed", value: completed, accent: "text-emerald-600" },
+    /* Green was text-emerald-600 */
+    { label: "Completed", value: completed, accent: "text-sky-600" },
     { label: "Total",     value: total,     accent: "text-slate-800" },
   ];
 

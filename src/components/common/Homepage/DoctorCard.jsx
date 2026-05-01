@@ -26,7 +26,8 @@ export default function DoctorCard({ doctor, clinic }) {
             className="w-20 h-20 rounded-2xl object-cover border border-slate-100 bg-slate-50"
           />
           <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center ${
-            doctor.available ? "bg-emerald-500" : "bg-slate-300"
+            /* Green was bg-emerald-500 */
+            doctor.available ? "bg-sky-500" : "bg-slate-300"
           }`}>
             <span className="w-1.5 h-1.5 bg-white rounded-full" />
           </div>
@@ -39,7 +40,8 @@ export default function DoctorCard({ doctor, clinic }) {
             <ChevronRight size={16} className="text-slate-300 flex-shrink-0 mt-0.5" />
           </div>
           
-          <p className="text-emerald-600 text-[12px] font-bold mb-2 flex items-center gap-1">
+          {/* Green was text-emerald-600 */}
+          <p className="text-sky-600 text-[12px] font-bold mb-2 flex items-center gap-1">
             <Stethoscope size={12} strokeWidth={2.5} />
             {doctor.specialty}
           </p>

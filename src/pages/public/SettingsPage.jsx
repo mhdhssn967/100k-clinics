@@ -192,7 +192,8 @@ export default function SettingsPage() {
           label: "Privacy & Security",
           sub: "Password, data & account",
           Icon: Shield,
-          accent: "bg-emerald-50 text-emerald-600",
+          /* Green was bg-emerald-50 text-emerald-600 */
+          accent: "bg-sky-50 text-sky-600",
         },
       ],
     },
@@ -230,7 +231,8 @@ export default function SettingsPage() {
                   className="w-16 h-16 rounded-2xl object-cover"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-2xl bg-emerald-600 flex items-center justify-center text-white text-xl font-bold">
+                /* Green was bg-emerald-600 */
+                <div className="w-16 h-16 rounded-2xl bg-sky-600 flex items-center justify-center text-white text-xl font-bold">
                   {initials || "?"}
                 </div>
               )}
@@ -313,7 +315,8 @@ export default function SettingsPage() {
           {patientPhotoURL ? (
             <img src={patientPhotoURL} className="w-12 h-12 rounded-xl object-cover" alt="" />
           ) : (
-            <div className="w-12 h-12 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold">
+            /* Green was bg-emerald-600 */
+            <div className="w-12 h-12 rounded-xl bg-sky-600 flex items-center justify-center text-white font-bold">
               {initials}
             </div>
           )}
@@ -346,7 +349,8 @@ export default function SettingsPage() {
               <p className="text-sm font-semibold text-slate-800">{item.label}</p>
               <p className="text-xs text-slate-400 mt-0.5">{item.sub}</p>
             </div>
-            <div className={`w-11 h-6 rounded-full relative transition-colors ${item.on ? "bg-emerald-500" : "bg-slate-200"}`}>
+            {/* Green was bg-emerald-500 */}
+            <div className={`w-11 h-6 rounded-full relative transition-colors ${item.on ? "bg-sky-500" : "bg-slate-200"}`}>
               <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${item.on ? "translate-x-5" : "translate-x-1"}`} />
             </div>
           </div>

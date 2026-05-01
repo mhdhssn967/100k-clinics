@@ -114,11 +114,13 @@ export default function ClinicList() {
                     {items.length} {items.length === 1 ? 'Clinic' : 'Clinics'}
                   </span>
                 </h3>
-                <div className="h-1 w-8 bg-emerald-500 rounded-full mt-1" />
+                {/* Green was bg-emerald-500 */}
+                <div className="h-1 w-8 bg-sky-500 rounded-full mt-1" />
               </div>
               <button 
                 onClick={() => { setSpecialty(name.toLowerCase()); setActiveTab("clinic"); }}
-                className="bg-emerald-50 text-emerald-600 text-[11px] font-bold px-3 py-1 rounded-full hover:bg-emerald-100 transition-colors flex items-center gap-0.5"
+                /* Green was bg-emerald-50 text-emerald-600 hover:bg-emerald-100 */
+                className="bg-sky-50 text-sky-600 text-[11px] font-bold px-3 py-1 rounded-full hover:bg-sky-100 transition-colors flex items-center gap-0.5"
               >
                 View all <ChevronRight size={12} />
               </button>

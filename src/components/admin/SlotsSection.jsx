@@ -174,7 +174,8 @@ export default function SlotsSection() {
               onChange={e => { setCustomSlot(e.target.value); setError(""); }}
               onKeyDown={e => e.key === "Enter" && addCustom()}
               placeholder="e.g. 2:15 PM"
-              className={`w-full border rounded-xl px-3.5 py-2.5 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 transition-all ${
+              /* Green was focus:border-emerald-400 focus:ring-emerald-100 */
+              className={`w-full border rounded-xl px-3.5 py-2.5 text-sm text-slate-700 placeholder-slate-300 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 transition-all ${
                 error ? "border-rose-400" : "border-slate-200"
               }`}
             />

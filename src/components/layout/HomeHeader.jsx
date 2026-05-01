@@ -76,7 +76,8 @@ export default function HomeHeader() {
       <div className="flex items-center justify-between mb-5 max-w-3xl mx-auto w-full">
         <div>
           <button className="flex items-center gap-1 mb-1.5 group">
-            <MapPin size={11} className="text-emerald-500" strokeWidth={2.5} />
+            {/* Green was text-emerald-500 */}
+            <MapPin size={11} className="text-sky-500" strokeWidth={2.5} />
             <div className="flex items-center gap-1.5">
               <span className="text-slate-500 text-xs font-medium tracking-wide">
                 {location}
@@ -111,7 +112,7 @@ export default function HomeHeader() {
           {payload ? (
             <button 
               onClick={() => navigate('/settings?open=profile')}
-              className="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center text-white text-sm font-bold overflow-hidden shrink-0 active:scale-90 transition-transform"
+              className="w-9 h-9 rounded-full bg-sky-600 flex items-center justify-center text-white text-sm font-bold overflow-hidden shrink-0 active:scale-90 transition-transform"
             >
               {payload.patientProfileImage ? (
                 <img 
@@ -128,7 +129,7 @@ export default function HomeHeader() {
           ) : (
             <button
               onClick={() => navigate('/login/user')}
-              className="px-4 py-2 text-sm font-bold bg-emerald-600 text-white rounded-xl hover:bg-emerald-500 transition-all active:scale-95"
+              className="px-4 py-2 text-sm font-bold bg-sky-600 text-white rounded-xl hover:bg-sky-500 transition-all active:scale-95"
             >
               Sign In
             </button>
@@ -137,9 +138,9 @@ export default function HomeHeader() {
       </div>
  
       {/* <div className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 border transition-all duration-150 ${
-        focused ? "bg-white border-emerald-400 shadow-sm" : "bg-slate-50 border-slate-200"
+        focused ? "bg-white border-sky-400 shadow-sm" : "bg-slate-50 border-slate-200"
       }`}>
-        <Search size={15} className={focused ? "text-emerald-500" : "text-slate-400"} strokeWidth={2.5} />
+        <Search size={15} className={focused ? "text-sky-500" : "text-slate-400"} strokeWidth={2.5} />
         <input
           type="text"
           value={localQuery}

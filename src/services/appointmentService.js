@@ -5,19 +5,29 @@ import { collection, query, where, orderBy, getDocs, doc, updateDoc, deleteDoc, 
   serverTimestamp  } from "firebase/firestore";
 
 
+function generateAppointmentId() {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const prefix = chars.charAt(Math.floor(Math.random() * chars.length)) + 
+                 chars.charAt(Math.floor(Math.random() * chars.length));
+  const number = Math.floor(1000 + Math.random() * 9000); // 4 digit number
+  return `${prefix}-${number}`;
+}
+
 export const createAppointment = async (payload) => {
   try {
+    const bookingCode = generateAppointmentId();
     // Path: db/bookings/active/ (This creates a document inside 'active')
     const activeBookingsRef = collection(db, "bookings", "active", "list");
     
     const bookingData = {
       ...payload,
+      bookingCode, // Human readable ID like CX-2409
       status: "active", // Internal flag for easy logic
       createdAt: serverTimestamp(),
     };
 
     const docRef = await addDoc(activeBookingsRef, bookingData);
-    
+
     return { id: docRef.id, ...bookingData };
   } catch (error) {
     console.error("Error writing to Firestore:", error);

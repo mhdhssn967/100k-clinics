@@ -26,12 +26,12 @@ export default function PublicDoctorModal({ isOpen, onClose, doctor, onBook }) {
                  alt={doctor.name} 
                  className="w-24 h-24 rounded-xl object-cover bg-slate-100" 
                />
-               <div className={`absolute bottom-0 right-0 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center ${doctor.available ? "bg-emerald-500" : "bg-slate-300"}`}>
+               <div className={`absolute bottom-0 right-0 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center ${doctor.available ? "bg-sky-500" : "bg-slate-300"}`}>
                  {doctor.available && <CheckCircle size={10} className="text-white" strokeWidth={3}/>}
                </div>
             </div>
             <div className="pb-2">
-              <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${doctor.available ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500"}`}>
+              <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${doctor.available ? "bg-sky-50 text-sky-600" : "bg-slate-100 text-slate-500"}`}>
                 {doctor.available ? "Available" : "Currently Busy"}
               </span>
             </div>
@@ -40,11 +40,13 @@ export default function PublicDoctorModal({ isOpen, onClose, doctor, onBook }) {
           {/* Details */}
           <div>
             <h2 className="text-xl font-bold text-slate-900 mb-1">{doctor.name}</h2>
-            <p className="text-emerald-600 font-semibold text-sm mb-4">{doctor.specialty}</p>
+            {/* Green was text-emerald-600 */}
+            <p className="text-sky-600 font-semibold text-sm mb-4">{doctor.specialty}</p>
 
             <div className="grid grid-cols-2 gap-3 mb-6">
               <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center text-emerald-500 shrink-0">
+                {/* Green was text-emerald-500 */}
+                <div className="w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center text-sky-500 shrink-0">
                    <Briefcase size={14} />
                 </div>
                 <div>
@@ -53,7 +55,8 @@ export default function PublicDoctorModal({ isOpen, onClose, doctor, onBook }) {
                 </div>
               </div>
               <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center text-emerald-500 shrink-0">
+                {/* Green was text-emerald-500 */}
+                <div className="w-8 h-8 rounded-xl bg-white shadow-sm flex items-center justify-center text-sky-500 shrink-0">
                    <Banknote size={14} />
                 </div>
                 <div>

@@ -26,7 +26,8 @@ const ROLE = {
     label: "Clinic Admin",
     sub: "Manage your clinic, doctors & queue",
     icon: <Building2 size={18} />,
-    accent: "emerald",
+    /* Green was emerald */
+    accent: "sky",
     redirect: "/clinic/home",
     canRegister: false, // clinics register via /register-clinic
   },
@@ -51,12 +52,13 @@ const COUNTRY_CODES = [
 ];
 
 const ACCENT = {
+  /* Green was emerald configuration */
   emerald: {
-    badge:  "bg-emerald-50 text-emerald-700 border border-emerald-200",
-    icon:   "bg-emerald-100 text-emerald-700",
-    btn:    "bg-emerald-600 hover:bg-emerald-500",
-    ring:   "focus:ring-emerald-200",
-    tab:    "border-emerald-500 text-emerald-700",
+    badge:  "bg-sky-50 text-sky-700 border border-sky-200",
+    icon:   "bg-sky-100 text-sky-700",
+    btn:    "bg-sky-600 hover:bg-sky-500",
+    ring:   "focus:ring-sky-200",
+    tab:    "border-sky-500 text-sky-700",
   },
   sky: {
     badge:  "bg-sky-50 text-sky-700 border border-sky-200",
@@ -464,10 +466,11 @@ const handleLoginSuccess = async (user) => {
         {/* Brand */}
         <div className="flex items-center gap-2 mb-6">
           <div className="w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center">
-            <Activity className="text-emerald-400" size={17} />
+            {/* Green was text-emerald-400 */}
+            <Activity className="text-sky-400" size={17} />
           </div>
           <span className="text-lg font-black tracking-tight">
-            100K<span className="text-emerald-600">Clinics</span>
+            100K<span className="text-sky-600">Clinics</span>
           </span>
         </div>
 
@@ -803,16 +806,19 @@ const handleLoginSuccess = async (user) => {
             <div className="px-6 pb-5">
               <div
                 onClick={() => navigate("/register-clinic")}
-                className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/30 cursor-pointer transition-all group"
+                /* Green was hover:border-emerald-200 hover:bg-emerald-50/30 */
+                className="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-100 hover:border-sky-200 hover:bg-sky-50/30 cursor-pointer transition-all group"
               >
-                <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-emerald-600 transition-colors shrink-0">
+                {/* Green was group-hover:text-emerald-600 */}
+                <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-sky-600 transition-colors shrink-0">
                   <Building2 size={14} />
                 </div>
                 <div className="flex-1">
                   <p className="text-xs font-bold text-slate-700">New clinic?</p>
                   <p className="text-[10px] text-slate-400">Register your clinic →</p>
                 </div>
-                <ChevronRight size={13} className="text-slate-300 group-hover:text-emerald-500 transition-colors" />
+                {/* Green was group-hover:text-emerald-500 */}
+                <ChevronRight size={13} className="text-slate-300 group-hover:text-sky-500 transition-colors" />
               </div>
             </div>
           )}

@@ -8,7 +8,8 @@ import AppointmentDetailsModal from '../../components/common/AppointmentDetailsM
 
 
 const STATUS_STYLES = {
-  completed: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  // Green was bg-emerald-50 text-emerald-700 border border-emerald-200
+  completed: 'bg-sky-50 text-sky-700 border border-sky-200',
   cancelled: 'bg-rose-50 text-rose-600 border border-rose-200',
   pending: 'bg-amber-50 text-amber-700 border border-amber-200',
 };
@@ -132,7 +133,8 @@ export default function ClinicBookings() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <StatCard label="Today's Load" value={analytics.today} color="text-amber-600" bg="bg-amber-50" icon={<Activity size={14}/>} />
           <StatCard label="Top Doctor" value={analytics.topDoc} color="text-indigo-600" bg="bg-indigo-50" icon={<TrendingUp size={14}/>} subtext="Most bookings" />
-          <StatCard label="Top Specialty" value={analytics.topSpec} color="text-emerald-600" bg="bg-emerald-50" icon={<Activity size={14}/>} subtext="High demand" />
+          {/* Green was text-emerald-600 bg-emerald-50 */}
+          <StatCard label="Top Specialty" value={analytics.topSpec} color="text-sky-600" bg="bg-sky-50" icon={<Activity size={14}/>} subtext="High demand" />
           <StatCard label="Completion" value={`${analytics.completionRate}%`} color="text-violet-600" bg="bg-violet-50" icon={<CheckCircle2 size={14}/>} />
         </div>
 
@@ -159,7 +161,7 @@ export default function ClinicBookings() {
                 placeholder="Search patient or ID..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all font-medium"
+                className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500/50 transition-all font-medium"
               />
             </div>
 
@@ -168,7 +170,7 @@ export default function ClinicBookings() {
               <select 
                 value={filterDoctor} 
                 onChange={e => setFilterDoctor(e.target.value)}
-                className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
               >
                 <option value="all">Every Doctor</option>
                 {uniqueDoctors.map(d => <option key={d} value={d}>{d}</option>)}
@@ -177,7 +179,7 @@ export default function ClinicBookings() {
               <select 
                 value={filterSpecialty} 
                 onChange={e => setFilterSpecialty(e.target.value)}
-                className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
               >
                 <option value="all">All Specs</option>
                 {uniqueSpecialties.map(s => <option key={s} value={s}>{s}</option>)}
@@ -186,7 +188,7 @@ export default function ClinicBookings() {
               <select 
                 value={filterGender} 
                 onChange={e => setFilterGender(e.target.value)}
-                className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-600 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
               >
                 <option value="all">All Gender</option>
                 <option value="male">Male</option>
@@ -215,7 +217,8 @@ export default function ClinicBookings() {
               <Icon size={14} />
               {label}
               {key === 'active' && appointments.length > 0 && (
-                <span className="bg-emerald-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
+                /* Green was bg-emerald-500 */
+                <span className="bg-sky-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 leading-none">
                   {appointments.length}
                 </span>
               )}
@@ -294,7 +297,7 @@ function AppointmentCard({ appt, onSelect }) {
     text: `Confirm completion for ${appt.patientName}`,
     icon: 'question',
     showCancelButton: true,
-    confirmButtonColor: '#10b981', // emerald-500
+    confirmButtonColor: '#0ea5e9', // Sky-500 (was emerald-500 #10b981)
     cancelButtonColor: '#64748b',  // slate-500
     confirmButtonText: 'Yes, complete it!',
     borderRadius: '1rem',
@@ -344,7 +347,7 @@ function AppointmentCard({ appt, onSelect }) {
             </p>
           </div>
         </div>
-        <span className="text-[10px] font-mono text-slate-300">#{appt.id.slice(-6)}</span>
+        <span className="text-[10px] font-mono text-sky-600 font-bold bg-sky-50 px-2 py-0.5 rounded-lg">{appt.bookingCode}</span>
       </div>
 
       {/* Divider */}
@@ -356,8 +359,8 @@ function AppointmentCard({ appt, onSelect }) {
           <Calendar size={13} className="text-slate-400 shrink-0" />
           <span>{appt.date}</span>
         </div>
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
-          <Clock size={11} className="text-emerald-500" />
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-sky-50 border border-sky-200 px-2.5 py-1 rounded-full">
+          <Clock size={11} className="text-sky-500" />
           {appt.time}
         </div>
       </div>

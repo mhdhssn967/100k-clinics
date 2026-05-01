@@ -6,7 +6,8 @@ import Swal from "sweetalert2";
 
 function statusBadge(status) {
   return {
-    confirmed: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    /* Green was bg-emerald-50 text-emerald-700 border-emerald-200 */
+    confirmed: "bg-sky-50 text-sky-700 border-sky-200",
     pending:   "bg-amber-50 text-amber-700 border-amber-200",
     cancelled: "bg-red-50 text-red-600 border-red-200",
     completed: "bg-slate-100 text-slate-500 border-slate-200",
@@ -101,7 +102,8 @@ export default function UpcomingBanner() {
         <p className="text-slate-900 font-bold text-[15px]">Upcoming Appoinments</p>
         <button
           onClick={() => navigate("/bookings")}
-          className="flex items-center gap-1 text-[12px] text-emerald-600 font-semibold"
+          /* Green was text-emerald-600 */
+          className="flex items-center gap-1 text-[12px] text-sky-600 font-semibold"
         >
           See all <ArrowRight size={13} />
         </button>

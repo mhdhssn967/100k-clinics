@@ -63,25 +63,28 @@ function SelectorField({ label, value, active, onClick, children, dropdownOpen, 
     <div className="relative flex-1 min-w-0">
       <button
         onClick={onClick}
+        /* Green was border-emerald-400 bg-emerald-50 hover:border-emerald-300 hover:bg-emerald-50/30 */
         className={`w-full flex flex-col items-start px-3 py-2.5 rounded-xl border transition-all duration-150 text-left ${
           active
-            ? "border-emerald-400 bg-emerald-50"
-            : "border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/30"
+            ? "border-sky-400 bg-sky-50"
+            : "border-slate-200 bg-white hover:border-sky-300 hover:bg-sky-50/30"
         }`}
       >
         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
           {label}
         </span>
         <div className="flex items-center gap-1 w-full min-w-0">
+          {/* Green was text-emerald-700 */}
           <span className={`text-[13px] font-bold truncate flex-1 leading-tight ${
-            active ? "text-emerald-700" : "text-slate-700"
+            active ? "text-sky-700" : "text-slate-700"
           }`}>
             {value}
           </span>
           <ChevronDown
             size={12}
+            /* Green was text-emerald-500 */
             className={`flex-shrink-0 transition-transform duration-150 ${
-              dropdownOpen ? "rotate-180 text-emerald-500" : "text-slate-400"
+              dropdownOpen ? "rotate-180 text-sky-500" : "text-slate-400"
             }`}
           />
         </div>
@@ -98,11 +101,13 @@ function SelectorField({ label, value, active, onClick, children, dropdownOpen, 
 // ─────────────────────────────────────────────────────────────────────────────
 function FilterPill({ label, onRemove }) {
   return (
-    <span className="flex items-center gap-1 bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0">
+    /* Green was bg-emerald-100 text-emerald-800 border-emerald-200 */
+    <span className="flex items-center gap-1 bg-sky-100 text-sky-800 border border-sky-200 text-[11px] font-semibold px-2.5 py-1 rounded-full flex-shrink-0">
       {label}
       <button
         onClick={onRemove}
-        className="text-emerald-500 hover:text-emerald-800 transition-colors ml-0.5"
+        /* Green was text-emerald-500 hover:text-emerald-800 */
+        className="text-sky-500 hover:text-sky-800 transition-colors ml-0.5"
       >
         <X size={10} strokeWidth={3} />
       </button>
@@ -172,14 +177,14 @@ export default function ClinicSearchCard() {
 
   return (
     <div className="w-full relative group z-20">
-      <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-500"></div>
+      <div className="absolute -inset-1 bg-gradient-to-r from-[#74C7F8] to-sky-500 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-500"></div>
       <div className="bg-white rounded-2xl overflow-visible shadow-xl border border-white relative">
 
         {/* ── Coloured header band ──────────────────────────────────────── */}
-        <div className="bg-gradient-to-r from-emerald-600 to-teal-500 rounded-t-2xl px-4 pt-4 pb-0">
+        <div className="bg-gradient-to-r from-sky-500 to-[#74C7F8] rounded-t-2xl px-4 pt-4 pb-0">
           {/* Label */}
-          <p className="text-emerald-100 text-[11px] font-semibold uppercase tracking-widest mb-2.5">
-            Find healthcare near you
+          <p className="text-sky-50 text-[11px] font-semibold uppercase tracking-widest mb-2.5">
+            Find healthcare facility near you
           </p>
 
           {/* Tabs on the coloured band */}
@@ -192,8 +197,8 @@ export default function ClinicSearchCard() {
                   onClick={() => handleTab(id)}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-t-xl text-[12px] font-bold transition-all duration-150 flex-1 justify-center ${
                     active
-                      ? "bg-white text-emerald-700"
-                      : "text-emerald-100 hover:text-white hover:bg-white/10"
+                      ? "bg-white text-sky-700"
+                      : "text-sky-50 hover:text-white hover:bg-white/10"
                   }`}
                 >
                   <Icon size={12} strokeWidth={active ? 2.5 : 2} />
@@ -213,13 +218,13 @@ export default function ClinicSearchCard() {
           <div className="relative">
             <div className={`flex items-center gap-2.5 rounded-xl border-2 px-3.5 py-3 transition-all duration-200 ${
               focused
-                ? "border-emerald-500 bg-white shadow-sm shadow-emerald-100"
+                ? "border-sky-400 bg-white shadow-sm shadow-sky-100"
                 : "border-slate-200 bg-slate-50"
             }`}>
               <Search
                 size={17}
                 strokeWidth={2.5}
-                className={`flex-shrink-0 transition-colors ${focused ? "text-emerald-500" : "text-slate-400"}`}
+                className={`flex-shrink-0 transition-colors ${focused ? "text-sky-500" : "text-slate-400"}`}
               />
               <input
                 ref={inputRef}
@@ -256,7 +261,7 @@ export default function ClinicSearchCard() {
                     <button
                       key={s}
                       onMouseDown={() => pickSuggestion(s)}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-emerald-50 text-left transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-sky-50 text-left transition-colors"
                     >
                       <Search size={12} className="text-slate-300 flex-shrink-0" />
                       <span className="text-slate-700 text-[13px] font-medium">{s}</span>
@@ -283,10 +288,10 @@ export default function ClinicSearchCard() {
                   <button
                     key={sp.id}
                     onClick={() => { setSpecialty(sp.id); closeDropdown(); }}
-                    className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-emerald-50 text-left transition-colors text-[13px] text-slate-700 border-b border-slate-50 last:border-0"
+                    className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-sky-50 text-left transition-colors text-[13px] text-slate-700 border-b border-slate-50 last:border-0"
                   >
                     <span>{sp.label}</span>
-                    {specialty === sp.id && <Check size={13} className="text-emerald-600" strokeWidth={2.5} />}
+                    {specialty === sp.id && <Check size={13} className="text-sky-600" strokeWidth={2.5} />}
                   </button>
                 ))}
               </div>
@@ -304,10 +309,10 @@ export default function ClinicSearchCard() {
                 <button
                   key={opt.label}
                   onClick={() => { setMaxDist(opt.value); closeDropdown(); }}
-                  className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-emerald-50 text-left transition-colors text-[13px] text-slate-700 border-b border-slate-50 last:border-0"
+                  className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-sky-50 text-left transition-colors text-[13px] text-slate-700 border-b border-slate-50 last:border-0"
                 >
                   <span>{opt.label}</span>
-                  {maxDistance === opt.value && <Check size={13} className="text-emerald-600" strokeWidth={2.5} />}
+                  {maxDistance === opt.value && <Check size={13} className="text-sky-600" strokeWidth={2.5} />}
                 </button>
               ))}
             </SelectorField>
@@ -324,13 +329,13 @@ export default function ClinicSearchCard() {
                 <button
                   key={id}
                   onClick={() => { setSortBy(id); closeDropdown(); }}
-                  className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-emerald-50 text-left transition-colors text-[13px] text-slate-700 border-b border-slate-50 last:border-0"
+                  className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-sky-50 text-left transition-colors text-[13px] text-slate-700 border-b border-slate-50 last:border-0"
                 >
                   <span className="flex items-center gap-2">
                     <Icon size={12} className="text-slate-400" />
                     {label}
                   </span>
-                  {sortBy === id && <Check size={13} className="text-emerald-600" strokeWidth={2.5} />}
+                  {sortBy === id && <Check size={13} className="text-sky-600" strokeWidth={2.5} />}
                 </button>
               ))}
             </SelectorField>
@@ -343,19 +348,19 @@ export default function ClinicSearchCard() {
               className="flex items-center gap-2 group"
             >
               <div className={`w-9 h-[18px] rounded-full relative transition-all duration-200 ${
-                onlyOpen ? "bg-emerald-500" : "bg-slate-200"
+                onlyOpen ? "bg-sky-500" : "bg-slate-200"
               }`}>
                 <span className={`absolute top-[2px] w-[14px] h-[14px] bg-white rounded-full shadow-sm transition-all duration-200 ${
                   onlyOpen ? "left-[18px]" : "left-[2px]"
                 }`} />
               </div>
               <span className={`text-[12px] font-semibold transition-colors ${
-                onlyOpen ? "text-emerald-700" : "text-slate-500"
+                onlyOpen ? "text-sky-700" : "text-slate-500"
               }`}>
                 Open now only
               </span>
               {onlyOpen && (
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
               )}
             </button>
 
@@ -376,7 +381,8 @@ export default function ClinicSearchCard() {
               setShowSuggestions(false);
               inputRef.current?.blur();
             }}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-bold text-[14px] py-3.5 rounded-xl transition-all duration-150 flex items-center justify-center gap-2 shadow-md shadow-emerald-200/60"
+            /* Green was bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200/60 */
+            className="w-full bg-sky-600 hover:bg-sky-700 active:scale-[0.98] text-white font-bold text-[14px] py-3.5 rounded-xl transition-all duration-150 flex items-center justify-center gap-2 shadow-md shadow-sky-200/60"
           >
             <Search size={15} strokeWidth={2.5} />
             {results.length > 0 ? (

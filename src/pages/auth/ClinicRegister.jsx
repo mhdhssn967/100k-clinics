@@ -25,7 +25,7 @@ function StepIndicator({ current }) {
           <div className="flex flex-col items-center gap-1.5">
             <div className={`
               w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
-              ${i < current ? 'bg-emerald-500 text-white' : i === current ? 'bg-slate-900 text-white ring-4 ring-slate-900/10' : 'bg-slate-100 text-slate-400'}
+              ${i < current ? 'bg-sky-500 text-white' : i === current ? 'bg-slate-900 text-white ring-4 ring-slate-900/10' : 'bg-slate-100 text-slate-400'}
             `}>
               {i < current ? <CheckCircle2 size={14} /> : i + 1}
             </div>
@@ -34,7 +34,7 @@ function StepIndicator({ current }) {
             </span>
           </div>
           {i < STEPS.length - 1 && (
-            <div className={`flex-1 h-px mx-2 mb-5 transition-all duration-500 ${i < current ? 'bg-emerald-400' : 'bg-slate-200'}`} />
+            <div className={`flex-1 h-px mx-2 mb-5 transition-all duration-500 ${i < current ? 'bg-sky-400' : 'bg-slate-200'}`} />
           )}
         </React.Fragment>
       ))}
@@ -92,12 +92,13 @@ function LocationBadge({ status, coords, address }) {
     </div>
   );
   if (status === 'success') return (
-    <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-emerald-50 border border-emerald-200">
-      <CheckCircle2 size={13} className="text-emerald-600 mt-0.5 shrink-0" />
+    /* Green was bg-emerald-50 border-emerald-200 */
+    <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-sky-50 border border-sky-200">
+      <CheckCircle2 size={13} className="text-sky-600 mt-0.5 shrink-0" />
       <div className="flex-1 min-w-0">
-        <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider mb-0.5">Location Verified</p>
-        {address && <p className="text-xs text-emerald-700 truncate">{address}</p>}
-        <p className="text-[10px] text-emerald-500 font-mono mt-0.5">
+        <p className="text-[11px] font-bold text-sky-700 uppercase tracking-wider mb-0.5">Location Verified</p>
+        {address && <p className="text-xs text-sky-700 truncate">{address}</p>}
+        <p className="text-[10px] text-sky-500 font-mono mt-0.5">
           {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
         </p>
       </div>
@@ -330,13 +331,15 @@ const handleSelectLocation = (place) => {
 
   // ══════════════════════════════════════════════
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 flex items-center justify-center p-4 sm:p-8">
+    /* Green was to-emerald-50/30 */
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50/30 flex items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-3xl">
 
         {/* ── Header ── */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold uppercase tracking-widest mb-4">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          {/* Green was bg-emerald-50 border-emerald-200 text-emerald-700 */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-50 border border-sky-200 text-sky-700 text-xs font-bold uppercase tracking-widest mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
             100KClinics Network
           </div>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Register Your Clinic</h1>
@@ -364,7 +367,7 @@ const handleSelectLocation = (place) => {
                   onClick={() => fileInputRef.current?.click()}
                   className={`
                     relative h-40 rounded-2xl border-2 border-dashed cursor-pointer transition-all overflow-hidden group
-                    ${dragOver ? 'border-emerald-400 bg-emerald-50' : image ? 'border-transparent' : 'border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100/60'}
+                    ${/* Green was border-emerald-400 bg-emerald-50 */ dragOver ? 'border-sky-400 bg-sky-50' : image ? 'border-transparent' : 'border-slate-200 hover:border-slate-300 bg-slate-50 hover:bg-slate-100/60'}
                   `}
                 >
                   {image ? (
@@ -533,7 +536,8 @@ const handleSelectLocation = (place) => {
             flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all
             ${
               locStatus === "success"
-                ? "bg-emerald-500 text-white"
+                /* Green was bg-emerald-500 */
+                ? "bg-sky-500 text-white"
                 : "bg-slate-900 text-white hover:bg-slate-700 active:scale-95"
             }
             disabled:opacity-60
@@ -585,7 +589,8 @@ const handleSelectLocation = (place) => {
         <summary className="text-slate-400 cursor-pointer hover:text-slate-600">
           View stored GPS data →
         </summary>
-        <div className="mt-2 font-mono text-[11px] bg-slate-900 text-emerald-400 rounded-xl px-4 py-3 space-y-0.5">
+        {/* Green was text-emerald-400 */}
+        <div className="mt-2 font-mono text-[11px] bg-slate-900 text-sky-400 rounded-xl px-4 py-3 space-y-0.5">
           <div>lat: {formData.lat}</div>
           <div>lng: {formData.lng}</div>
           <div>accuracy: ±{formData.accuracy?.toFixed(1)}m</div>
@@ -621,7 +626,8 @@ const handleSelectLocation = (place) => {
                   type="button"
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="px-8 py-3 rounded-xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-500 active:scale-95 disabled:opacity-60 transition-all flex items-center gap-2"
+                  /* Green was bg-emerald-600 hover:bg-emerald-500 */
+                  className="px-8 py-3 rounded-xl bg-sky-600 text-white text-sm font-bold hover:bg-sky-500 active:scale-95 disabled:opacity-60 transition-all flex items-center gap-2"
                 >
                   {loading ? <><Loader2 size={15} className="animate-spin" /> Registering…</> : <>Complete Registration ✓</>}
                 </button>

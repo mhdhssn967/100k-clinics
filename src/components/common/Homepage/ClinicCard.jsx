@@ -98,10 +98,12 @@ export default function ClinicCard({ clinic, searchQuery }) {
  
         {/* Status pill */}
         <div className="absolute top-3 left-3 flex items-center gap-1.5">
+          {/* Green was text-emerald-700 */}
           <span className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-lg backdrop-blur-md ${
-            clinic.isOpen ? "bg-white/90 text-emerald-700" : "bg-black/50 text-white/80"
+            clinic.isOpen ? "bg-white/90 text-sky-700" : "bg-black/50 text-white/80"
           }`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${clinic.isOpen ? "bg-emerald-500" : "bg-slate-400"}`} />
+            {/* Green was bg-emerald-500 */}
+            <span className={`w-1.5 h-1.5 rounded-full ${clinic.isOpen ? "bg-sky-500" : "bg-slate-400"}`} />
             {clinic.isOpen ? `Open till ${clinic.openUntil}` : "Closed"}
           </span>
         </div>
@@ -151,13 +153,17 @@ export default function ClinicCard({ clinic, searchQuery }) {
           d.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           d.specialty?.toLowerCase().includes(searchQuery.toLowerCase())
         ) && (
-          <div className="mb-3 p-2 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
+          /* Green was bg-emerald-50 border-emerald-100 */
+          <div className="mb-3 p-2 bg-sky-50 border border-sky-100 rounded-xl flex items-center gap-2">
+            {/* Green was bg-emerald-100 text-emerald-600 */}
+            <div className="w-6 h-6 rounded-lg bg-sky-100 flex items-center justify-center text-sky-600">
               <Users size={12} />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-tight">Matching Specialist</p>
-              <p className="text-[11px] text-emerald-600 font-medium truncate">
+              {/* Green was text-emerald-700 */}
+              <p className="text-[10px] font-bold text-sky-700 uppercase tracking-tight">Matching Specialist</p>
+              {/* Green was text-emerald-600 */}
+              <p className="text-[11px] text-sky-600 font-medium truncate">
                 {clinic.doctors.find(d => 
                   d.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                   d.specialty?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -185,7 +191,8 @@ export default function ClinicCard({ clinic, searchQuery }) {
               e.stopPropagation();
               useStore.getState().openBookingModal(clinic);
             }}
-            className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-lg shadow-sm shadow-emerald-100 transition-all active:scale-95"
+            /* Green was bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100 */
+            className="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-bold rounded-lg shadow-sm shadow-sky-100 transition-all active:scale-95"
           >
             Book Now
           </button>
