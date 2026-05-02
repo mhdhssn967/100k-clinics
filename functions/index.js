@@ -8,6 +8,7 @@ exports.sendAppointmentEmail = onDocumentCreated({
   document: "bookings/active/list/{appointmentId}",
   secrets: [RESEND_API_KEY],
 }, async (event) => {
+  console.log("!!! Function Triggered !!! Event ID:", event.id);
   const snap = event.data;
   if (!snap) return;
 
@@ -25,8 +26,8 @@ exports.sendAppointmentEmail = onDocumentCreated({
   const resend = new Resend(RESEND_API_KEY.value());
 
   try {
-    await resend.emails.send({
-      from: "100KClinics <onboarding@resend.dev>",
+    const { data: resendData, error: resendError } = await resend.emails.send({
+      from: "100KClinics <bookings@100kclinics.com>",
       to: data.patientEmail,
       subject: `Appointment Confirmed: ${data.clinicName}`,
       html: `
@@ -73,8 +74,12 @@ exports.sendAppointmentEmail = onDocumentCreated({
       `,
     });
 
-    console.log(`[Email Success] Sent to ${data.patientEmail} for appointment ${event.params.appointmentId}`);
+    if (resendError) {
+      console.error("[Email Error] Resend returned an error:", resendError);
+    } else {
+      console.log(`[Email Success] Sent to ${data.patientEmail}. ID: ${resendData.id}`);
+    }
   } catch (error) {
-    console.error("[Email Error] Resend API failed:", error);
+    console.error("[Email Catch Error] Resend API failed to execute:", error);
   }
 });
