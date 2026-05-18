@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useStore } from "../../store";
 import { useSearchStore } from "../../store/searchStore";
 import HomeHeader from "../../components/layout/HomeHeader";
@@ -27,6 +28,24 @@ export default function Home() {
       <div className="max-w-3xl mx-auto w-full">
         <div className="px-4 pt-4 space-y-5">
           <ClinicEnrollBanner />
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-slate-900 font-semibold text-base">Discover our journey</p>
+                <p className="text-slate-500 text-sm leading-6">
+                  Learn how 100KClinics began with one young innovator’s vision to make healthcare accessible for everyone.
+                </p>
+              </div>
+              <Link
+                to="/story"
+                className="inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition"
+              >
+                Read our story
+              </Link>
+            </div>
+          </div>
+
           <ClinicSearchCard />
           
           <div className="px-1">

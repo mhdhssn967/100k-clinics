@@ -20,6 +20,7 @@ import ClinicDetail from "./components/common/Homepage/ClinicDetail.jsx";
 import ReviewsPage from "./pages/public/ReviewsPage.jsx";
 import SettingsPage from "./pages/public/SettingsPage.jsx";
 import ClinicAdminPanel from "./pages/public/ClinicAdminPanel.jsx";
+import Story from "./pages/public/Story.jsx";
 import ClinicBookingsPage from "./pages/clinic-admin/ClinicBookingsPage.jsx";
 // import ClinicHome from "./pages/clinic/ClinicHome.jsx";  ← uncomment when ready
 
@@ -181,6 +182,7 @@ function AppShell() {
 
           {/* Public clinic detail */}
           <Route path="/clinic/:id" element={<ClinicDetail />} />
+          <Route path="/story" element={<Story />} />
 
           {/* Clinic admin dashboard */}
           <Route path="/clinic/home" element={
